@@ -1,2 +1,2 @@
 # library-of-babel
-A digital repository of linked ideas
+A digital repository of linked ideas.
