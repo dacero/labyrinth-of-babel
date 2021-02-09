@@ -16,7 +16,6 @@ type Name struct {
 func main() {
 	db, err := sql.Open("mysql", "root:launder-motive-DREAR@tcp(127.0.0.1:3306)/hello")
 	defer db.Close()
-
 	if err != nil {
 		log.Fatal(err)
 	}
