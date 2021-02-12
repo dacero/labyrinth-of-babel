@@ -1,4 +1,4 @@
-module hello
+module src/hello
 
 go 1.15
 
