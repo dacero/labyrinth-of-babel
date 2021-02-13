@@ -5,3 +5,8 @@ build:
 	go build -o bin/hello src/hello.go
 lint:
 	golangci-lint run
+# Docker
+dbuild:
+	docker build -t hello .
+drun:
+	docker-compose up -d
