@@ -10,4 +10,4 @@ CREATE TABLE `names` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `names` VALUES (4,'What a change... refactor for good!');
+INSERT INTO `names` VALUES (4,'This is the app running in 2 containers!');
