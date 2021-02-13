@@ -1,0 +1,17 @@
+version: "3.7"
+
+services:
+  app:
+    image: hello
+    ports:
+      - 8080:8080
+  mysql:
+    image: mysql:8.0
+    volumes:
+      - hello-mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: hello
+
+volumes:
+  hello-mysql-data:
