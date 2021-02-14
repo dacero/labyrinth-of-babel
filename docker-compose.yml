@@ -2,16 +2,16 @@ version: "3.7"
 
 services:
   app:
-    image: hello
+    image: lob
     ports:
       - 8080:8080
   mysql:
     image: mysql:8.0
     volumes:
-      - hello-mysql-data:/var/lib/mysql
+      - lob-mysql-data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: secret
-      MYSQL_DATABASE: hello
+      MYSQL_DATABASE: labyrinth-of-babel
 
 volumes:
-  hello-mysql-data:
+  lob-mysql-data:

@@ -8,4 +8,4 @@ COPY . .
 
 RUN make build
 
-CMD ["/app/bin/hello"]
+CMD ["/app/bin/lob"]
