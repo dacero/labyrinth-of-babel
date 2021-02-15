@@ -2,11 +2,11 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
+	"text/template"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -52,21 +52,21 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	row := db.QueryRow("SELECT id, title, body FROM cells")
-
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	var cell Cell
 	err = row.Scan(&cell.Id, &cell.Title, &cell.Body)
-
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Fprintf(w, "ID: %v!\n", cell.Id)
-	fmt.Fprintf(w, "Title: %v!\n", cell.Title)
-	fmt.Fprintf(w, "Body: %v!\n", cell.Body)
+	t, _ := template.ParseFiles("./src/card.html")
+	err = t.Execute(w, cell)
+	if err != nil {
+		log.Printf("Error when returning card: %s", err)
+	}
 
 }
 
