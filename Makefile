@@ -2,11 +2,11 @@ run:
 	go run src/hello.go
 build:
 	go mod download
-	go build -o bin/hello src/hello.go
+	go build -o bin/lob src/lob.go
 lint:
 	golangci-lint run
 # Docker
 dbuild:
-	docker build -t hello .
+	docker build -t lob .
 drun:
 	docker-compose up -d

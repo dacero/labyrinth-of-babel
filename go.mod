@@ -1,4 +1,4 @@
-module src/hello
+module src/lob
 
 go 1.15
 
