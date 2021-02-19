@@ -7,14 +7,17 @@ import (
 	"net/http"
 	"strings"
 	"text/template"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 type Cell struct {
-	Id    string
-	Title string
-	Body  string
+	Id          string
+	Title       string
+	Body        string
+	Create_time time.Time
+	Update_time time.Time
 }
 
 // initialises the database
@@ -45,19 +48,19 @@ func init() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:secret@tcp(mysql:3306)/labyrinth_of_babel")
+	db, err := sql.Open("mysql", "root:secret@tcp(mysql:3306)/labyrinth_of_babel?parseTime=true")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 
-	row := db.QueryRow("SELECT id, title, body FROM cells")
+	row := db.QueryRow("SELECT id, title, body, create_time, update_time FROM cells")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	var cell Cell
-	err = row.Scan(&cell.Id, &cell.Title, &cell.Body)
+	err = row.Scan(&cell.Id, &cell.Title, &cell.Body, &cell.Create_time, &cell.Update_time)
 	if err != nil {
 		log.Fatal(err)
 	}
