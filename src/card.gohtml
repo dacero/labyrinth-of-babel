@@ -27,7 +27,9 @@
 					{{end}}
 				</ul>
 				<ul class="card-link-list">Links
-					<li class="card-link">There will be links</li>
+					{{range .Links}}
+					<li class="card-link">{{.Text}}</li>
+					{{end}}
 				</ul>
 			</article>
 		</main>

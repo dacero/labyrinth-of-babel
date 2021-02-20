@@ -16,6 +16,11 @@ type Source struct {
 	Source string
 }
 
+type CellLink struct {
+	Id   string
+	Text string
+}
+
 type Cell struct {
 	Id          string
 	Title       string
@@ -23,6 +28,7 @@ type Cell struct {
 	Create_time time.Time
 	Update_time time.Time
 	Sources     []Source
+	Links       []CellLink
 }
 
 // initialises the database
@@ -71,6 +77,7 @@ func getCell(id string) Cell {
 	}
 
 	cell.Sources = getCellSources(id)
+	cell.Links = getCellLinks(id)
 
 	return cell
 }
@@ -104,6 +111,44 @@ func getCellSources(id string) []Source {
 		log.Fatal(err)
 	}
 	return sources
+}
+
+func getCellLinks(id string) []CellLink {
+	db, err := sql.Open("mysql", "root:secret@tcp(mysql:3306)/labyrinth_of_babel?parseTime=true")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	rows, err := db.Query(`SELECT c.id, c.title, c.body, c.update_time 
+		FROM cells_links l, cells c 
+		WHERE l.cells_a = c.id
+		AND l.cells_b = ?
+		UNION
+		SELECT c.id, c.title, c.body, c.update_time 
+		FROM cells_links l, cells c 
+		WHERE l.cells_b = c.id
+		AND l.cells_a = ?
+		ORDER BY update_time DESC;`, id, id)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	var links []CellLink
+	for rows.Next() {
+		var id, title, body string
+		var update_time time.Time
+		err := rows.Scan(&id, &title, &body, &update_time)
+		if err != nil {
+			log.Fatal(err)
+		}
+		links = append(links, CellLink{Id: id, Text: title})
+	}
+	if err := rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+	return links
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
