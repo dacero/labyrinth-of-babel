@@ -171,7 +171,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("Error when returning card: %s", err)
 	}
-
 }
 
 func main() {
