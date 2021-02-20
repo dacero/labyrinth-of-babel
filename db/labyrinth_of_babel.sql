@@ -75,7 +75,7 @@ INSERT INTO `sources` VALUES ('A single source');
 
 INSERT INTO `topics` VALUES ('First topic');
 
-INSERT INTO `cells` VALUES ('2213f29185094571a4750dbb24f225ec','The second idea','This is the body of the second idea, which is, obviously related to the first','2021-02-14 17:22:49','2021-02-14 17:22:49'),('b2020ced60d743c99464b90d8d2f3440','The first idea','This is the body of the first idea','2021-02-14 17:21:43','2021-02-14 17:21:43');
+INSERT INTO `cells` VALUES ('2213f29185094571a4750dbb24f225ec','The second idea','This is the body of the second idea, which is, obviously related to the first','2021-02-14 17:22:49','2021-02-14 17:22:49'),('b2020ced60d743c99464b90d8d2f3440','','This is the body of the first idea and if the length is over 60 characters this should be cut down into pieces and make it ok to not show there','2021-02-14 17:21:43','2021-02-14 17:21:43');
 
 INSERT INTO `cells_links` VALUES ('2213f29185094571a4750dbb24f225ec','b2020ced60d743c99464b90d8d2f3440');
 

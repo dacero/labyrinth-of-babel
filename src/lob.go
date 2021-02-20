@@ -137,13 +137,23 @@ func getCellLinks(id string) []CellLink {
 
 	var links []CellLink
 	for rows.Next() {
-		var id, title, body string
+		var id, title, body, text string
 		var update_time time.Time
 		err := rows.Scan(&id, &title, &body, &update_time)
 		if err != nil {
 			log.Fatal(err)
 		}
-		links = append(links, CellLink{Id: id, Text: title})
+		if title == "" {
+			r := []rune(body)
+			if len(r) > 60 {
+				text = string(r[0:50]) + "..."
+			} else {
+				text = body
+			}
+		} else {
+			text = title
+		}
+		links = append(links, CellLink{Id: id, Text: text})
 	}
 	if err := rows.Err(); err != nil {
 		log.Fatal(err)
