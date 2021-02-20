@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -59,28 +60,32 @@ func init() {
 	log.Print("Finished initiatlizing db!")
 }
 
-func getCell(id string) Cell {
+func getCell(id string) (Cell, error) {
+	var cell Cell
+
 	db, err := sql.Open("mysql", "root:secret@tcp(mysql:3306)/labyrinth_of_babel?parseTime=true")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return cell, err
 	}
 	defer db.Close()
 
 	row := db.QueryRow("SELECT id, title, body, room, create_time, update_time FROM cells WHERE id=?", id)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return cell, err
 	}
 
-	var cell Cell
 	err = row.Scan(&cell.Id, &cell.Title, &cell.Body, &cell.Room, &cell.Create_time, &cell.Update_time)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return cell, err
 	}
 
 	cell.Sources = getCellSources(id)
 	cell.Links = getCellLinks(id)
 
-	return cell
+	return cell, nil
 }
 
 func getCellSources(id string) []Source {
@@ -164,13 +169,17 @@ func getCellLinks(id string) []CellLink {
 
 func viewHandler(w http.ResponseWriter, r *http.Request) {
 	cellId := r.URL.Path[len("/view/"):]
-	// cell := getCell("72aed05b-cb2d-4cad-bf70-05d8ae02a7bc")
-	cell := getCell(cellId)
-
-	t, _ := template.ParseFiles("./src/card.gohtml")
-	err := t.Execute(w, cell)
+	cell, err := getCell(cellId)
 	if err != nil {
 		log.Printf("Error when returning card: %s", err)
+		notFound, _ := ioutil.ReadFile("./src/card_not_found.html")
+		fmt.Fprintf(w, string(notFound))
+	} else {
+		t, _ := template.ParseFiles("./src/card.gohtml")
+		err = t.Execute(w, cell)
+		if err != nil {
+			log.Printf("Error when returning card: %s", err)
+		}
 	}
 }
 
