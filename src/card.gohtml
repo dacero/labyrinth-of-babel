@@ -15,17 +15,21 @@
 		<main>
 			<!--here's where the card actually goes-->
 			<article class="card">
-				<div class="card-room">Pending...</div>
+				<div class="card-room">{{.Room}}</div>
 				<div class="card-title">{{.Title}}</div>
-				<div class="card-date">25 Jan 2021</div>
+				<div class="card-date">{{.Create_time.Format "02 Jan 2006"}}</div>
 				<div class="card-body">
 					{{.Body}}
 				</div>
 				<ul class="card-source-list">Source
-					<li class="card-source">This will contain the list of sources</li>
+					{{range .Sources}}
+					<li class="card-source">{{.Source}}</li>
+					{{end}}
 				</ul>
 				<ul class="card-link-list">Links
-					<li class="card-link">There will be links</li>
+					{{range .Links}}
+					<li class="card-link">{{.Text}}</li>
+					{{end}}
 				</ul>
 			</article>
 		</main>
