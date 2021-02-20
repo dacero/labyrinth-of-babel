@@ -162,9 +162,10 @@ func getCellLinks(id string) []CellLink {
 	return links
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
-
-	cell := getCell("72aed05b-cb2d-4cad-bf70-05d8ae02a7bc")
+func viewHandler(w http.ResponseWriter, r *http.Request) {
+	cellId := r.URL.Path[len("/view/"):]
+	// cell := getCell("72aed05b-cb2d-4cad-bf70-05d8ae02a7bc")
+	cell := getCell(cellId)
 
 	t, _ := template.ParseFiles("./src/card.gohtml")
 	err := t.Execute(w, cell)
@@ -174,6 +175,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/", handler)
+	http.HandleFunc("/view/", viewHandler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
