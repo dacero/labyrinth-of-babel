@@ -25,6 +25,7 @@ type Cell struct {
 	Id          string
 	Title       string
 	Body        string
+	Room        string
 	Create_time time.Time
 	Update_time time.Time
 	Sources     []Source
@@ -65,13 +66,13 @@ func getCell(id string) Cell {
 	}
 	defer db.Close()
 
-	row := db.QueryRow("SELECT id, title, body, create_time, update_time FROM cells WHERE id=?", id)
+	row := db.QueryRow("SELECT id, title, body, room, create_time, update_time FROM cells WHERE id=?", id)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	var cell Cell
-	err = row.Scan(&cell.Id, &cell.Title, &cell.Body, &cell.Create_time, &cell.Update_time)
+	err = row.Scan(&cell.Id, &cell.Title, &cell.Body, &cell.Room, &cell.Create_time, &cell.Update_time)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -163,7 +164,7 @@ func getCellLinks(id string) []CellLink {
 
 func handler(w http.ResponseWriter, r *http.Request) {
 
-	cell := getCell("2213f29185094571a4750dbb24f225ec")
+	cell := getCell("72aed05b-cb2d-4cad-bf70-05d8ae02a7bc")
 
 	t, _ := template.ParseFiles("./src/card.gohtml")
 	err := t.Execute(w, cell)
