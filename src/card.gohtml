@@ -22,7 +22,9 @@
 					{{.Body}}
 				</div>
 				<ul class="card-source-list">Source
-					<li class="card-source">This will contain the list of sources</li>
+					{{range .Sources}}
+					<li class="card-source">{{.Source}}</li>
+					{{end}}
 				</ul>
 				<ul class="card-link-list">Links
 					<li class="card-link">There will be links</li>
