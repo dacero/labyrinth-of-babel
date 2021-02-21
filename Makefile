@@ -1,8 +1,8 @@
 run:
-	go run src/hello.go
+	go run src/main.go
 build:
 	go mod download
-	go build -o bin/lob src/lob.go
+	go build -o bin/lob src/main.go
 lint:
 	golangci-lint run
 # Docker
