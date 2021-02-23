@@ -60,6 +60,6 @@ func viewHandler(lob repository.LobRepository) func(http.ResponseWriter, *http.R
 
 func main() {
 	lobRepository := repository.NewLobRepository()
-	http.HandleFunc("/view/", viewHandler(&lobRepository))
+	http.HandleFunc("/view/", viewHandler(lobRepository))
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

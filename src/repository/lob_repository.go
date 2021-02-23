@@ -13,13 +13,13 @@ type LobRepository interface {
 	GetCell(id string) (models.Cell, error)
 }
 
-func NewLobRepository() lobRepository {
+func NewLobRepository() *lobRepository {
 	newDB, err := sql.Open("mysql", "root:secret@tcp(mysql:3306)/labyrinth_of_babel?parseTime=true")
 	if err != nil {
 		log.Panic(err)
 	}
 	//defer newDB.Close()
-	return lobRepository{db: newDB}
+	return &lobRepository{db: newDB}
 }
 
 type lobRepository struct {
