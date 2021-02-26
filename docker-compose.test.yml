@@ -1,0 +1,19 @@
+version: "3.7"
+
+services:
+  app:
+    image: lob
+    ports:
+      - 8080:8080
+    command:
+      ["/app/utils/wait-for-it.sh", "mysql:3306", "--", "/app/utils/test.sh"] 
+  mysql:
+    image: mysql:8.0
+    volumes:
+      - lob-mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: labyrinth-of-babel
+
+volumes:
+  lob-mysql-data:

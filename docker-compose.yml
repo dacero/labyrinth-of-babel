@@ -5,6 +5,8 @@ services:
     image: lob
     ports:
       - 8080:8080
+    command:
+      ["/app/utils/wait-for-it.sh", "mysql:3306", "--", "/app/bin/lob"] 
   mysql:
     image: mysql:8.0
     volumes:
