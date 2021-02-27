@@ -1,8 +1,5 @@
 run:
 	go run src/main.go
-build:
-	go mod download
-	go build -o bin/lob
 lint:
 	golangci-lint run
 # Docker
@@ -11,4 +8,5 @@ dbuild:
 drun:
 	docker-compose up -d
 dtest:
+	docker build -t lob-test . --target base
 	docker-compose -f docker-compose.test.yml up
