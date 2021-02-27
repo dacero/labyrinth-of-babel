@@ -12,6 +12,7 @@ import (
 
 type LobRepository interface {
 	GetCell(id string) (models.Cell, error)
+	Close()
 }
 
 func NewLobRepository() *lobRepository {
@@ -19,7 +20,6 @@ func NewLobRepository() *lobRepository {
 	if err != nil {
 		log.Panic(err)
 	}
-	//defer newDB.Close()
 	return &lobRepository{db: newDB}
 }
 
@@ -29,6 +29,10 @@ type lobRepository struct {
 
 func (r *lobRepository) getDB() *sql.DB {
 	return r.db
+}
+
+func (r *lobRepository) Close() {
+	r.db.Close()
 }
 
 func (r *lobRepository) GetCell(id string) (models.Cell, error) {
