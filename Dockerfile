@@ -4,6 +4,3 @@ WORKDIR /app
 COPY . .
 RUN make build
 CMD ["/app/bin/lob"]
-
-FROM build as test
-RUN go test src/lob/src/repository

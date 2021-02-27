@@ -3,8 +3,9 @@ package repository
 import (
 	"database/sql"
 	"log"
-	"src/lob/src/models"
 	"time"
+
+	"github.com/dacero/labyrinth-of-babel/models"
 
 	_ "github.com/go-sql-driver/mysql"
 )

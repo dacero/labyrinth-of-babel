@@ -2,7 +2,7 @@ run:
 	go run src/main.go
 build:
 	go mod download
-	go build -o bin/lob src/main.go
+	go build -o bin/lob
 lint:
 	golangci-lint run
 # Docker

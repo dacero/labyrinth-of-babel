@@ -6,9 +6,10 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"src/lob/src/repository"
 	"strings"
 	"text/template"
+
+	"github.com/dacero/labyrinth-of-babel/repository"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -46,10 +47,10 @@ func viewHandler(lob repository.LobRepository) func(http.ResponseWriter, *http.R
 		cell, err := lob.GetCell(cellId)
 		if err != nil {
 			log.Printf("Error when returning card: %s", err)
-			notFound, _ := ioutil.ReadFile("./src/card_not_found.html")
+			notFound, _ := ioutil.ReadFile("./templates/card_not_found.html")
 			fmt.Fprintf(w, string(notFound))
 		} else {
-			t, _ := template.ParseFiles("./src/card.gohtml")
+			t, _ := template.ParseFiles("./templates/card.gohtml")
 			err = t.Execute(w, cell)
 			if err != nil {
 				log.Printf("Error when returning card: %s", err)
