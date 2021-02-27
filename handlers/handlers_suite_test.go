@@ -2,9 +2,14 @@ package handlers_test
 
 import (
 	"testing"
-
+	"net/http"	
+	"net/http/httptest"
+	
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	
+	"github.com/dacero/labyrinth-of-babel/repository"
+	"github.com/dacero/labyrinth-of-babel/handlers"
 )
 
 func TestRepository(t *testing.T) {
@@ -12,48 +17,43 @@ func TestRepository(t *testing.T) {
 	RunSpecs(t, "Handlers Suite")
 }
 
-/*
-var _ = Describe("Repository", func() {
+var _ = Describe("Handler", func() {
 	var (
-		cell    models.Cell
 		lobRepo repository.LobRepository
+		req		*http.Request
+		rr		*httptest.ResponseRecorder
+		handler	func(w http.ResponseWriter, r *http.Request)
 		err     error
 		cellId  = "72aed05b-cb2d-4cad-bf70-05d8ae02a7bc"
 	)
 
 	BeforeEach(func() {
 		lobRepo = repository.NewLobRepository()
+		rr = httptest.NewRecorder()
 	})
 
-	Describe("Retrieving a cell", func() {
-		Context("that exists", func() {
-
+	Describe("Viewing a card", func() {
+		Context("for a cell that exists", func() {
 			BeforeEach(func() {
-				cell, err = lobRepo.GetCell(cellId)
-			})
-
-			It("should return that cell and no error", func() {
+				req, err = http.NewRequest("GET", "http://localhost:8080/view/"+cellId, nil)
 				Expect(err).To(BeNil())
-				Expect(cell.Id).To(Equal(cellId))
+				handler = handlers.ViewHandler(lobRepo)
+				handler(rr, req)
 			})
-
-			It("should contain all sources", func() {
-				Expect(len(cell.Sources)).To(Equal(2))
-			})
-
-			It("should contain all links", func() {
-				Expect(len(cell.Links)).To(Equal(2))
+			It("should return Status OK", func() {
+				Expect(rr.Code).To(Equal(http.StatusOK))
 			})
 		})
-
-		Context("that does NOT exist", func() {
+		Context("for a cell that does not exist", func() {
 			BeforeEach(func() {
-				cell, err = lobRepo.GetCell("Inexistent cell")
+				req, err = http.NewRequest("GET", "http://localhost:8080/view/error", nil)
+				Expect(err).To(BeNil())
+				handler = handlers.ViewHandler(lobRepo)
+				handler(rr, req)
 			})
-			It("should error", func() {
-				Expect(err).To(HaveOccurred())
+			It("should return NOT FOUND error", func() {
+				Expect(rr.Code).To(Equal(http.StatusNotFound))
 			})
 		})
 	})
 })
-*/
