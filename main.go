@@ -2,15 +2,14 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
-	"text/template"
 
 	"github.com/dacero/labyrinth-of-babel/repository"
-
+	"github.com/dacero/labyrinth-of-babel/handlers"
+	
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -41,27 +40,9 @@ func init() {
 	log.Print("Finished initiatlizing db!")
 }
 
-func viewHandler(lob repository.LobRepository) func(http.ResponseWriter, *http.Request) {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cellId := r.URL.Path[len("/view/"):]
-		cell, err := lob.GetCell(cellId)
-		if err != nil {
-			log.Printf("Error when returning card: %s", err)
-			notFound, _ := ioutil.ReadFile("./templates/card_not_found.html")
-			fmt.Fprintf(w, string(notFound))
-		} else {
-			t, _ := template.ParseFiles("./templates/card.gohtml")
-			err = t.Execute(w, cell)
-			if err != nil {
-				log.Printf("Error when returning card: %s", err)
-			}
-		}
-	})
-}
-
 func main() {
 	lobRepository := repository.NewLobRepository()
 	defer lobRepository.Close()
-	http.HandleFunc("/view/", viewHandler(lobRepository))
+	http.HandleFunc("/view/", handlers.ViewHandler(lobRepository))
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
