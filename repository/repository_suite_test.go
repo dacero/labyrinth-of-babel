@@ -1,9 +1,10 @@
 package repository_test
 
 import (
-	"src/lob/src/models"
-	"src/lob/src/repository"
 	"testing"
+
+	"github.com/dacero/labyrinth-of-babel/models"
+	"github.com/dacero/labyrinth-of-babel/repository"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

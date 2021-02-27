@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-go test src/lob/src/repository
+go test github.com/dacero/labyrinth-of-babel/repository
