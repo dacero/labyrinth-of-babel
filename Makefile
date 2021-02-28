@@ -1,12 +1,12 @@
 run:
-	go run src/hello.go
-build:
-	go mod download
-	go build -o bin/lob src/lob.go
+	go run src/main.go
 lint:
 	golangci-lint run
 # Docker
 dbuild:
-	docker build -t lob .
+	docker build -t lob . --target build 
 drun:
 	docker-compose up -d
+dtest:
+	docker build -t lob-test . --target base
+	docker-compose -f docker-compose.test.yml up

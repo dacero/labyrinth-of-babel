@@ -1,11 +1,10 @@
-FROM golang:1.15-alpine3.12
-
-RUN apk add --no-cache make
-
+FROM golang:1.15-alpine3.12 as base
+RUN apk add --no-cache build-base bash
 WORKDIR /app
-
+COPY go.* .
+RUN go mod download
 COPY . .
 
-RUN make build
-
+FROM base as build
+RUN go build -o bin/lob
 CMD ["/app/bin/lob"]
