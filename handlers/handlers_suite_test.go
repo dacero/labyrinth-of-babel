@@ -41,7 +41,7 @@ var _ = Describe("Handler", func() {
 				Expect(err).To(BeNil())
 				handler = handlers.ViewHandler(lobRepo)
 				handler(rr, req)
-				body = string(rr.Body.Bytes())
+				body = rr.Body.String()
 			})
 			It("should return Status OK", func() {
 				Expect(rr.Code).To(Equal(http.StatusOK))
@@ -66,8 +66,6 @@ var _ = Describe("Handler", func() {
 				}
 				//there should be 2 links in that cell
 				Expect(len(clean_links)).To(Equal(2))
-				//the links should be links...
-				Expect(clean_links[0][:len(`<li class="card-link"><a`)]).To(Equal(`<li class="card-link"><a`))
 			})
 		})
 		Context("for a cell that does not exist", func() {
