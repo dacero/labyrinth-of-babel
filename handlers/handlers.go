@@ -21,7 +21,7 @@ func ViewHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *ht
 				log.Printf("Error when returning card: %s", err)
 			}
 			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprintf(w, string(notFound))
+			fmt.Fprint(w, string(notFound))
 		} else {
 			t, err := template.ParseFiles("./templates/card.gohtml")
 			if err != nil {
