@@ -6,12 +6,17 @@ import (
 	"time"
 
 	"github.com/dacero/labyrinth-of-babel/models"
+	"github.com/google/uuid"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 type LobRepository interface {
+	//gets a new cell from its id
 	GetCell(id string) (models.Cell, error)
+	//stores a new cell and returns its new id
+	NewCell(c models.Cell) (string, error)
+	//closes the database
 	Close()
 }
 
@@ -119,4 +124,9 @@ func (r *lobRepository) getCellLinks(id string) []models.CellLink {
 		log.Fatal(err)
 	}
 	return links
+}
+
+func (r *lobRepository) NewCell(cell models.Cell) (string, error) {
+	log.Println(uuid.String())
+	return uuid.String(), nil
 }

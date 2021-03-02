@@ -17,9 +17,11 @@ func TestRepository(t *testing.T) {
 
 var _ = Describe("Repository", func() {
 	var (
-		cell    models.Cell
-		lobRepo repository.LobRepository
-		err     error
+		cell    	models.Cell
+		newCell		models.Cell
+		newCellId	string
+		lobRepo 	repository.LobRepository
+		err     	error
 		cellId  = "72aed05b-cb2d-4cad-bf70-05d8ae02a7bc"
 	)
 
@@ -54,6 +56,23 @@ var _ = Describe("Repository", func() {
 			})
 			It("should error", func() {
 				Expect(err).To(HaveOccurred())
+			})
+		})
+	})
+	
+	Describe("Creating a new cell", func() {
+		Context("with proper information", func() {
+			BeforeEach(func() {
+				newCell = models.Cell{Title: "This is a new cell",
+									Body: "This is the body of the new cell",
+									Room: "This is a room",
+									Sources: []models.Source{ models.Source{Source:"Confucius"} } }
+				newCellId, err = lobRepo.NewCell(newCell)
+			})
+
+			It("should return a new cell id and no error", func() {
+				Expect(err).To(BeNil())
+				Expect(len(newCellId)).To(Equal(len("72aed05b-cb2d-4cad-bf70-05d8ae02a7bc")))
 			})
 		})
 	})
