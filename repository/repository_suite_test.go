@@ -74,6 +74,14 @@ var _ = Describe("Repository", func() {
 				Expect(err).To(BeNil())
 				Expect(len(newCellId)).To(Equal(len("72aed05b-cb2d-4cad-bf70-05d8ae02a7bc")))
 			})
+			It("should insert a cell in the repository, including sources", func() {
+				cell, err = lobRepo.GetCell(newCellId)
+				Expect(err).To(BeNil())
+				Expect(cell.Body).To(Equal(newCell.Body))
+				sources := cell.Sources
+				Expect(len(sources)).To(Equal(len(newCell.Sources)))
+				Expect(sources[0]).To(Equal(newCell.Sources[0]))
+			})
 		})
 	})
 })

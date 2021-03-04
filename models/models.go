@@ -17,6 +17,10 @@ type Source struct {
 	Source string
 }
 
+func (s Source) String() string {
+	return string(s.Source)
+}
+
 type CellLink struct {
 	Id   string
 	Text string

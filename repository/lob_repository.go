@@ -127,6 +127,66 @@ func (r *lobRepository) getCellLinks(id string) []models.CellLink {
 }
 
 func (r *lobRepository) NewCell(cell models.Cell) (string, error) {
-	log.Println(uuid.String())
-	return uuid.String(), nil
+	cellId := uuid.NewString()
+	
+	//insert the cell
+	stmt, err := r.getDB().Prepare("INSERT INTO cells(id, title, body, room) VALUES (?, ?, ?, ?)")
+	if err != nil {
+		return "", err
+	}
+	_, err = stmt.Exec(cellId, cell.Title, cell.Body, cell.Room)
+	if err != nil {
+		return "", err
+	}
+	//insert the sources
+	err = r.insertSources(cell.Sources)
+	if err != nil {
+		return "", err
+	}
+	//link sources with the cell
+	err = r.linkSources(cellId, cell.Sources)
+	if err != nil {
+		return "", err
+	}
+	return cellId, nil
+}
+
+func (r *lobRepository) insertSources(sources []models.Source) error {
+	insertStr := "INSERT IGNORE INTO sources(source) VALUES "
+	vals := []interface{}{}
+	for _, source := range sources {
+		insertStr += "(?),"
+		vals = append(vals, string(source.String()))
+	}
+	//trim the last
+	insertStr = insertStr[:len(insertStr)-1]
+	stmt, err := r.getDB().Prepare(insertStr)
+	if err != nil {
+		return err
+	}
+	_, err = stmt.Exec(vals...)
+	if err != nil {
+		return err
+	}
+	return nil	
+}
+
+func (r *lobRepository) linkSources(cellId string, sources []models.Source) error {
+	insertStr := "INSERT IGNORE INTO cells_sources(cells_id, sources_source) VALUES "
+	vals := []interface{}{}
+	for _, source := range sources {
+		insertStr += "(?, ?),"
+		vals = append(vals, cellId, string(source.String()))
+	}
+	//trim the last
+	insertStr = insertStr[:len(insertStr)-1]
+	stmt, err := r.getDB().Prepare(insertStr)
+	if err != nil {
+		return err
+	}
+	_, err = stmt.Exec(vals...)
+	if err != nil {
+		return err
+	}
+	return nil	
 }
