@@ -34,3 +34,10 @@ func ViewHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *ht
 		}
 	})
 }
+
+func CreateHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, "I've created a new cell")
+	})
+}

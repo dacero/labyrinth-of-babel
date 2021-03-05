@@ -4,6 +4,7 @@ import (
 	"testing"
 	"net/http"	
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	
 	. "github.com/onsi/ginkgo"
@@ -79,5 +80,24 @@ var _ = Describe("Handler", func() {
 				Expect(rr.Code).To(Equal(http.StatusNotFound))
 			})
 		})
+	})
+	
+	Describe("Creating a new card", func() {
+		Context("with proper information", func() {
+			BeforeEach(func() {
+				form := url.Values{}
+				form.Add("room", "This is a room")
+				form.Add("title", "The new cell")
+				form.Add("body", "This is the new cell I'm creating")
+				form.Add("source", "Confucius")
+				req, err := http.NewRequest("POST", "http://localhost:8080/newCell/", strings.NewReader(form.Encode()))
+				Expect(err).To(BeNil())
+				handler = handlers.CreateHandler(lobRepo)
+				handler(rr, req)
+			})
+			It("should return Status OK", func() {
+				Expect(rr.Code).To(Equal(http.StatusOK))
+			})
+		})	
 	})
 })
