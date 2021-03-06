@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"log"
 	"time"
+	"errors"
+	"strings"
 
 	"github.com/dacero/labyrinth-of-babel/models"
 	"github.com/google/uuid"
@@ -127,14 +129,27 @@ func (r *lobRepository) getCellLinks(id string) []models.CellLink {
 }
 
 func (r *lobRepository) NewCell(cell models.Cell) (string, error) {
+	//validations
+	if strings.TrimSpace(cell.Room) == "" {
+		return "", errors.New("Empty room name")
+	}
+	if strings.TrimSpace(cell.Body) == "" {
+		return "", errors.New("Empty body in new cell")
+	}
+	
 	cellId := uuid.NewString()
 	
+	//insert the room
+	err := r.insertRoom(cell.Room)
+	if err != nil {
+		return "", err
+	}
 	//insert the cell
 	stmt, err := r.getDB().Prepare("INSERT INTO cells(id, title, body, room) VALUES (?, ?, ?, ?)")
 	if err != nil {
 		return "", err
 	}
-	_, err = stmt.Exec(cellId, cell.Title, cell.Body, cell.Room)
+	_, err = stmt.Exec(cellId, strings.TrimSpace(cell.Title), strings.TrimSpace(cell.Body), strings.TrimSpace(cell.Room))
 	if err != nil {
 		return "", err
 	}
@@ -156,7 +171,7 @@ func (r *lobRepository) insertSources(sources []models.Source) error {
 	vals := []interface{}{}
 	for _, source := range sources {
 		insertStr += "(?),"
-		vals = append(vals, string(source.String()))
+		vals = append(vals, strings.TrimSpace(string(source.String())))
 	}
 	//trim the last
 	insertStr = insertStr[:len(insertStr)-1]
@@ -165,6 +180,21 @@ func (r *lobRepository) insertSources(sources []models.Source) error {
 		return err
 	}
 	_, err = stmt.Exec(vals...)
+	if err != nil {
+		return err
+	}
+	return nil	
+}
+
+func (r *lobRepository) insertRoom(room string) error {
+	if strings.TrimSpace(room) == "" {
+		return errors.New("Empty room name")
+	}
+	stmt, err := r.getDB().Prepare("INSERT IGNORE INTO rooms(room) VALUES (?)")
+	if err != nil {
+		return err
+	}
+	_, err = stmt.Exec(strings.TrimSpace(room))
 	if err != nil {
 		return err
 	}

@@ -83,5 +83,42 @@ var _ = Describe("Repository", func() {
 				Expect(sources[0]).To(Equal(newCell.Sources[0]))
 			})
 		})
+		Context("with a new room", func() {
+			BeforeEach(func() {
+				newCell = models.Cell{Title: "This is a new cell",
+									Body: "This is the body of the new cell",
+									Room: "This is a NEW ROOM",
+									Sources: []models.Source{ models.Source{Source:"Confucius"} } }
+				newCellId, err = lobRepo.NewCell(newCell)
+			})
+			It("should return a new cell id and no error", func() {
+				Expect(err).To(BeNil())
+				Expect(len(newCellId)).To(Equal(len("72aed05b-cb2d-4cad-bf70-05d8ae02a7bc")))
+			})
+		})
+		Context("with an empty room", func() {
+			BeforeEach(func() {
+				newCell = models.Cell{Title: "This is a new cell",
+									Body: "This is the body of the new cell",
+									Room: "",
+									Sources: []models.Source{ models.Source{Source:"Confucius"} } }
+				newCellId, err = lobRepo.NewCell(newCell)
+			})
+			It("should return an error", func() {
+				Expect(err).ToNot(BeNil())
+			})
+		})
+		Context("with an empty body", func() {
+			BeforeEach(func() {
+				newCell = models.Cell{Title: "This is a new cell",
+									Body: "",
+									Room: "This is a room",
+									Sources: []models.Source{ models.Source{Source:"Confucius"} } }
+				newCellId, err = lobRepo.NewCell(newCell)
+			})
+			It("should return an error", func() {
+				Expect(err).ToNot(BeNil())
+			})
+		})
 	})
 })
