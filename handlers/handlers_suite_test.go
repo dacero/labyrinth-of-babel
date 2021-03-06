@@ -104,7 +104,42 @@ var _ = Describe("Handler", func() {
 				Expect(newCellTitle).To(Equal("The new cell"))
 				*/
 			})
+		})
+		Context("without a body", func() {
+			BeforeEach(func() {
+				form := url.Values{}
+				form.Add("room", "This is a room")
+				form.Add("title", "The new cell")
+				form.Add("body", "")
+				form.Add("source", "Confucius")
+				req, err := http.NewRequest("POST", "http://localhost:8080/newCell/", strings.NewReader(form.Encode()))
+				Expect(err).To(BeNil())
+				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+				handler = handlers.CreateHandler(lobRepo)
+				handler(rr, req)
+			})
+			It("should return StatusBadRequest", func() {
+				Expect(rr.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("without a room", func() {
+			BeforeEach(func() {
+				form := url.Values{}
+				form.Add("room", "")
+				form.Add("title", "The new cell")
+				form.Add("body", "This one does have a body")
+				form.Add("source", "Confucius")
+				req, err := http.NewRequest("POST", "http://localhost:8080/newCell/", strings.NewReader(form.Encode()))
+				Expect(err).To(BeNil())
+				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+				handler = handlers.CreateHandler(lobRepo)
+				handler(rr, req)
+			})
+			It("should return StatusBadRequest", func() {
+				Expect(rr.Code).To(Equal(http.StatusBadRequest))
+			})
 		})	
+
 	})
 })
 

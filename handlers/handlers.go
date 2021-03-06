@@ -44,10 +44,8 @@ func CreateHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *
 			Body: r.PostFormValue("body"),
 			Room: r.PostFormValue("room"),
 			Sources: []models.Source{ models.Source{Source:r.PostFormValue("source")} } }
-		log.Printf("Cell being created: %s", newCell)
 		//call repository to create it
 		newCellId, err := lob.NewCell(newCell)
-		log.Printf("NewCellId: %s", newCellId)
 		if err != nil {
 			log.Printf("Error when creating card: %s", err)
 			w.WriteHeader(http.StatusBadRequest)
