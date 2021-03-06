@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"strings"
+	"errors"
 	
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -49,16 +50,12 @@ var _ = Describe("Handler", func() {
 			})
 			It("should contain the right number of links", func() {
 				// first I need to parse the body
-				links_start := `<ul class="card-link-list">Links`
-				links_end := `</ul> <!--links-->`
+				linksStart := `<ul class="card-link-list">Links`
+				linksEnd := `</ul> <!--links-->`
+				linksSubstr, err := extractFromPage(body, linksStart, linksEnd)
+				Expect(err).To(BeNil())
 				// find the index of the links_start
-				links_start_index := strings.Index(body, links_start) + len(links_start)
-				Expect(links_start_index).ToNot(Equal(-1))
-				links_end_index := strings.Index(body, links_end)
-				Expect(links_end_index).ToNot(Equal(-1))
-				//extract the links substring
-				links_substr := body[links_start_index:links_end_index]
-				links := strings.Split(links_substr, "\n")
+				links := strings.Split(linksSubstr, "\n")
 				var clean_links []string
 				for _, link := range links {
 					if strings.Contains(link, `<li class="card-link">`) {
@@ -92,12 +89,35 @@ var _ = Describe("Handler", func() {
 				form.Add("source", "Confucius")
 				req, err := http.NewRequest("POST", "http://localhost:8080/newCell/", strings.NewReader(form.Encode()))
 				Expect(err).To(BeNil())
+				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 				handler = handlers.CreateHandler(lobRepo)
 				handler(rr, req)
+				body = rr.Body.String()
 			})
-			It("should return Status OK", func() {
-				Expect(rr.Code).To(Equal(http.StatusOK))
+			It("should return Status Found", func() {
+				Expect(rr.Code).To(Equal(http.StatusFound))
+				//check the result page shows the new cell
+				/*
+				I've been unable to get this to work...
+				newCellTitle, err := extractFromPage(body, `<div class="card-title">`, `</div><!--title-->`)
+				Expect(err).To(BeNil())
+				Expect(newCellTitle).To(Equal("The new cell"))
+				*/
 			})
 		})	
 	})
 })
+
+//extracts the substring from s contained within start and finish 
+func extractFromPage(s string, start string, end string) (string, error) {
+	startIndex := strings.Index(s, start) + len(start)
+	if startIndex == -1 {
+		return "", errors.New("start not found: " + start)
+	}
+	endIndex := strings.Index(s, end)
+	if endIndex == -1 {
+		return "", errors.New("End not found: " + end)
+	}
+	//extract the links substring
+	return s[startIndex:endIndex], nil
+}
