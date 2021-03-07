@@ -44,6 +44,7 @@ func main() {
 	lobRepository := repository.NewLobRepository()
 	defer lobRepository.Close()
 	http.HandleFunc("/view/", handlers.ViewHandler(lobRepository))
+	http.HandleFunc("/edit/", handlers.EditHandler(lobRepository))
 	http.HandleFunc("/new", handlers.CreateHandler(lobRepository))
 	http.HandleFunc("/sources", handlers.SourcesHandler(lobRepository))
 	http.HandleFunc("/rooms", handlers.RoomsHandler(lobRepository))
