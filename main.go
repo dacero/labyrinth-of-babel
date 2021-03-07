@@ -45,6 +45,7 @@ func main() {
 	defer lobRepository.Close()
 	http.HandleFunc("/view/", handlers.ViewHandler(lobRepository))
 	http.HandleFunc("/new", handlers.CreateHandler(lobRepository))
+	http.HandleFunc("/sources", handlers.SourcesHandler(lobRepository))
 	http.HandleFunc("/page/", handlers.PageHandler())
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

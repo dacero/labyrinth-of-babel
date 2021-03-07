@@ -121,4 +121,19 @@ var _ = Describe("Repository", func() {
 			})
 		})
 	})
+	
+	Describe("Searching a source", func() {
+		Context("with existing terms", func() {
+			It("should return an array of elements", func() {
+				foundSources := lobRepo.SearchSources("Confu")
+				Expect(len(foundSources)).To(Equal(1))
+			})
+		})
+		Context("with inexisting terms", func() {
+			It("should return an empty array", func() {
+				foundSources := lobRepo.SearchSources("dshfksjfh")
+				Expect(len(foundSources)).To(Equal(0))
+			})
+		})
+	})
 })

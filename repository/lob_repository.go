@@ -18,6 +18,8 @@ type LobRepository interface {
 	GetCell(id string) (models.Cell, error)
 	//stores a new cell and returns its new id
 	NewCell(c models.Cell) (string, error)
+	//searches for sources that contain the terms passed
+	SearchSources(term string) []models.Source
 	//closes the database
 	Close()
 }
@@ -219,4 +221,29 @@ func (r *lobRepository) linkSources(cellId string, sources []models.Source) erro
 		return err
 	}
 	return nil	
+}
+
+func (r *lobRepository) SearchSources(term string) []models.Source {
+	var sources []models.Source
+	
+	rows, err := r.getDB().Query(`SELECT source 
+		FROM sources
+		WHERE source LIKE ?`, "%" + term + "%")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var source string
+		err := rows.Scan(&source)
+		if err != nil {
+			log.Fatal(err)
+		}
+		sources = append(sources, models.Source{Source: source})
+	}
+	if err := rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+	return sources
 }
