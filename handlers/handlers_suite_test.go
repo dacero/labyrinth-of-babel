@@ -5,6 +5,7 @@ import (
 	"net/http"	
 	"net/http/httptest"
 	"net/url"
+	"encoding/json"
 	"strings"
 	"errors"
 	
@@ -13,6 +14,7 @@ import (
 	
 	"github.com/dacero/labyrinth-of-babel/repository"
 	"github.com/dacero/labyrinth-of-babel/handlers"
+	"github.com/dacero/labyrinth-of-babel/models"
 )
 
 func TestRepository(t *testing.T) {
@@ -139,8 +141,44 @@ var _ = Describe("Handler", func() {
 				Expect(rr.Code).To(Equal(http.StatusBadRequest))
 			})
 		})	
-
 	})
+	
+	Describe("Searching for sources", func() {
+		Context("with proper terms", func() {
+			BeforeEach(func() {
+				req, err := http.NewRequest("GET", "http://localhost:8080/sources?term=Confu", nil)
+				Expect(err).To(BeNil())
+				handler = handlers.SourcesHandler(lobRepo)
+				handler(rr, req)
+				body = rr.Body.String()
+			})
+			It("should return a proper json", func() {
+				Expect(rr.Code).To(Equal(http.StatusOK))
+				var sources []models.Source
+				err = json.Unmarshal(rr.Body.Bytes(), &sources)
+				Expect(len(sources)).To(Equal(1))
+			})
+		})
+	})
+	
+	Describe("Searching for rooms", func() {
+		Context("with proper terms", func() {
+			BeforeEach(func() {
+				req, err := http.NewRequest("GET", "http://localhost:8080/sources?term=Habita", nil)
+				Expect(err).To(BeNil())
+				handler = handlers.RoomsHandler(lobRepo)
+				handler(rr, req)
+				body = rr.Body.String()
+			})
+			It("should return a proper json", func() {
+				Expect(rr.Code).To(Equal(http.StatusOK))
+				var rooms []string
+				err = json.Unmarshal(rr.Body.Bytes(), &rooms)
+				Expect(len(rooms)).To(Equal(1))
+			})
+		})
+	})
+
 })
 
 //extracts the substring from s contained within start and finish 

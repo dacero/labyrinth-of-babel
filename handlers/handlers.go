@@ -72,3 +72,31 @@ func PageHandler() func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, string(page))
 	})
 }
+
+func SourcesHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		term := r.FormValue("term")
+		sources := lob.SearchSources(term)
+		returnString := "["
+		for _, source := range sources {
+			returnString += `"` + source.String() + `",`
+		}
+		returnString = returnString[:len(returnString)-1] + "]"
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, returnString)
+	})
+}
+
+func RoomsHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		term := r.FormValue("term")
+		rooms := lob.SearchRooms(term)
+		returnString := "["
+		for _, room := range rooms {
+			returnString += `"` + room + `",`
+		}
+		returnString = returnString[:len(returnString)-1] + "]"
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, returnString)
+	})
+}
