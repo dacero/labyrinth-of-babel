@@ -87,7 +87,7 @@ var _ = Describe("Repository", func() {
 			BeforeEach(func() {
 				newCell = models.Cell{Title: "This is a new cell",
 									Body: "This is the body of the new cell",
-									Room: "This is a NEW ROOM",
+									Room: "Habitacion 2",
 									Sources: []models.Source{ models.Source{Source:"Confucius"} } }
 				newCellId, err = lobRepo.NewCell(newCell)
 			})
@@ -133,6 +133,21 @@ var _ = Describe("Repository", func() {
 			It("should return an empty array", func() {
 				foundSources := lobRepo.SearchSources("dshfksjfh")
 				Expect(len(foundSources)).To(Equal(0))
+			})
+		})
+	})
+	
+	Describe("Searching a room", func() {
+		Context("with existing terms", func() {
+			It("should return an array of elements", func() {
+				foundRooms := lobRepo.SearchRooms("Habita")
+				Expect(len(foundRooms)).To(Equal(1))
+			})
+		})
+		Context("with inexisting terms", func() {
+			It("should return an empty array", func() {
+				foundRooms := lobRepo.SearchRooms("dshfksjfh")
+				Expect(len(foundRooms)).To(Equal(0))
 			})
 		})
 	})

@@ -46,6 +46,7 @@ func main() {
 	http.HandleFunc("/view/", handlers.ViewHandler(lobRepository))
 	http.HandleFunc("/new", handlers.CreateHandler(lobRepository))
 	http.HandleFunc("/sources", handlers.SourcesHandler(lobRepository))
+	http.HandleFunc("/rooms", handlers.RoomsHandler(lobRepository))
 	http.HandleFunc("/page/", handlers.PageHandler())
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

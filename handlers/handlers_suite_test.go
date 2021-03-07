@@ -160,6 +160,25 @@ var _ = Describe("Handler", func() {
 			})
 		})
 	})
+	
+	Describe("Searching for rooms", func() {
+		Context("with proper terms", func() {
+			BeforeEach(func() {
+				req, err := http.NewRequest("GET", "http://localhost:8080/sources?term=Habita", nil)
+				Expect(err).To(BeNil())
+				handler = handlers.RoomsHandler(lobRepo)
+				handler(rr, req)
+				body = rr.Body.String()
+			})
+			It("should return a proper json", func() {
+				Expect(rr.Code).To(Equal(http.StatusOK))
+				var rooms []string
+				err = json.Unmarshal(rr.Body.Bytes(), &rooms)
+				Expect(len(rooms)).To(Equal(1))
+			})
+		})
+	})
+
 })
 
 //extracts the substring from s contained within start and finish 

@@ -10,15 +10,13 @@
 		<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 		<script>
 			  $( function() {
-				var availableRooms = [
-				  "This is a room",
-				  "This is the new room",
-				  "Room number 3",
-				  "Room number 4"
-				];
 				$( "#source" ).autocomplete({
 				  source: "/sources"
 				});
+				$( "#room" ).autocomplete({
+					  source: "/rooms"
+					});
+	
 			  } );
 			  </script>
 	</head>

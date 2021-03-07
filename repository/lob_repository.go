@@ -20,6 +20,8 @@ type LobRepository interface {
 	NewCell(c models.Cell) (string, error)
 	//searches for sources that contain the terms passed
 	SearchSources(term string) []models.Source
+	//searches for rooms that contain the terms passed
+	SearchRooms(term string) []string
 	//closes the database
 	Close()
 }
@@ -246,4 +248,29 @@ func (r *lobRepository) SearchSources(term string) []models.Source {
 		log.Fatal(err)
 	}
 	return sources
+}
+
+func (r *lobRepository) SearchRooms(term string) []string {
+	var rooms []string
+	
+	rows, err := r.getDB().Query(`SELECT room 
+		FROM rooms
+		WHERE room LIKE ?`, "%" + term + "%")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var room string
+		err := rows.Scan(&room)
+		if err != nil {
+			log.Fatal(err)
+		}
+		rooms = append(rooms, room)
+	}
+	if err := rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+	return rooms
 }
