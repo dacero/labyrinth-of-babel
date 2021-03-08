@@ -25,7 +25,8 @@
 
 		<main>
 			<!--here's where the card actually goes-->
-			<form action="/new" method="POST">
+			<form action="/save" method="POST">
+				<input type="hidden" id="cellId" name="cellId" value="{{.Id}}">
 				<label for="title">Room:</label><br>
 				<input type="text" id="room" name="room" value="{{.Room}}"><br>
 				<label for="title">Title:</label><br>

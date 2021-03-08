@@ -178,6 +178,43 @@ var _ = Describe("Handler", func() {
 			})
 		})
 	})
+	
+	Describe("Updating a card", func() {
+		Context("with proper information", func() {
+			BeforeEach(func() {
+				form := url.Values{}
+				form.Add("cellId", cellId)
+				form.Add("room", "This is a room")
+				form.Add("title", "Updated title")
+				form.Add("body", "I'm updating this cell")
+				req, err := http.NewRequest("POST", "http://localhost:8080/save/", strings.NewReader(form.Encode()))
+				Expect(err).To(BeNil())
+				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+				handler = handlers.SaveHandler(lobRepo)
+				handler(rr, req)
+			})
+			It("should return Status Found", func() {
+				Expect(rr.Code).To(Equal(http.StatusFound))
+			})
+		})
+		Context("with wrong information", func() {
+			BeforeEach(func() {
+				form := url.Values{}
+				form.Add("cellId", cellId)
+				form.Add("room", "  ")
+				form.Add("title", "Updated title")
+				form.Add("body", "  ")
+				req, err := http.NewRequest("POST", "http://localhost:8080/save/", strings.NewReader(form.Encode()))
+				Expect(err).To(BeNil())
+				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+				handler = handlers.SaveHandler(lobRepo)
+				handler(rr, req)
+			})
+			It("should return Status Found", func() {
+				Expect(rr.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+	})
 
 })
 
