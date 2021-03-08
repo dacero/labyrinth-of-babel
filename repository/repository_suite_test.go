@@ -151,4 +151,52 @@ var _ = Describe("Repository", func() {
 			})
 		})
 	})
+	
+	Describe("Updating a cell", func() {
+		Context("with good information", func() {
+			It("should return no error", func() {
+				updateCell := models.Cell{Id: cellId,
+					Title: "This is being updated",
+					Body: "The new cell being updated",
+					Room: "This is a room"}
+				update, err := lobRepo.UpdateCell(updateCell)
+				Expect(err).To(BeNil())
+				Expect(update).To(Equal(int64(1)))
+			})
+		})
+		Context("with a new room", func() {
+			It("should create the room and return no error", func() {
+				updateCell := models.Cell{Id: cellId,
+					Title: "This is being updated",
+					Body: "The new cell being updated",
+					Room: "Should create this room"}
+				update, err := lobRepo.UpdateCell(updateCell)
+				Expect(err).To(BeNil())
+				Expect(update).To(Equal(int64(1)))
+			})
+		})
+		Context("with an empty room", func() {
+			It("should return error", func() {
+				updateCell := models.Cell{Id: cellId,
+					Title: "This is being updated",
+					Body: "The new cell being updated",
+					Room: " "} //using empty spaces to test trimming
+				update, err := lobRepo.UpdateCell(updateCell)
+				Expect(err).ToNot(BeNil())
+				Expect(update).To(Equal(int64(0)))
+			})
+		})
+		Context("with an empty body", func() {
+			It("should return error", func() {
+				updateCell := models.Cell{Id: cellId,
+					Title: "This is being updated",
+					Body: "    ",  //using empty spaces to test trimming
+					Room: "This is a room"}
+				update, err := lobRepo.UpdateCell(updateCell)
+				Expect(err).ToNot(BeNil())
+				Expect(update).To(Equal(int64(0)))
+			})
+		})
+
+	})
 })
