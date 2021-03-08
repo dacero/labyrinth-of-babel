@@ -16,6 +16,8 @@ import (
 type LobRepository interface {
 	//gets a new cell from its id
 	GetCell(id string) (models.Cell, error)
+	//updates the cell with new content
+	UpdateCell(cell models.Cell) (int64, error)
 	//stores a new cell and returns its new id
 	NewCell(c models.Cell) (string, error)
 	//searches for sources that contain the terms passed
@@ -130,6 +132,27 @@ func (r *lobRepository) getCellLinks(id string) []models.CellLink {
 		log.Fatal(err)
 	}
 	return links
+}
+
+func (r *lobRepository) UpdateCell(cell models.Cell) (int64, error) {
+	//check the room and body to not be empty
+	if strings.TrimSpace(cell.Room) == "" {
+		return 0, errors.New("Empty room")
+	}
+	if strings.TrimSpace(cell.Body) == "" {
+		return 0, errors.New("Empty body")
+	}
+	//insert the room first, just in case we need to create one
+	err := r.insertRoom(cell.Room)
+	if err != nil {
+		return 0, err
+	}
+	//update the cell
+	result, err := r.getDB().Exec("UPDATE cells SET title = ?, body = ?, room = ?, update_time = ? where id = ?", cell.Title, cell.Body, cell.Room, time.Now(), cell.Id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
 }
 
 func (r *lobRepository) NewCell(cell models.Cell) (string, error) {
