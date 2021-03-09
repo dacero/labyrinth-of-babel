@@ -28,14 +28,14 @@
 				</ul>
 				<ul class="card-link-list">Links
 					{{range .Links}}
-					<li class="card-link"><a href="/view/{{.Id}}">{{.Text}}</a></li>
+					<li class="card-link"><a href="/cell/{{.Id}}">{{.Text}}</a></li>
 					{{end}}
 				</ul> <!--links-->
 			</article>
 		</main>
 
 		<footer>
-			<a href="/edit/{{.Id}}">Edit</a>
+			<a href="/cell/{{.Id}}/edit">Edit</a>
 		</footer>
 	</body>
 </html>
