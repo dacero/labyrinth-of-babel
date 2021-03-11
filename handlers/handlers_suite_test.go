@@ -41,7 +41,7 @@ var _ = Describe("Handler", func() {
 	Describe("Viewing a card", func() {
 		Context("for a cell that exists", func() {
 			BeforeEach(func() {
-				req, err = http.NewRequest("GET", "http://localhost:8080/view/"+cellId, nil)
+				req, err = http.NewRequest("GET", "http://localhost:8080/cell/"+cellId, nil)
 				Expect(err).To(BeNil())
 				handler = handlers.ViewHandler(lobRepo)
 				handler(rr, req)
@@ -70,7 +70,7 @@ var _ = Describe("Handler", func() {
 		})
 		Context("for a cell that does not exist", func() {
 			BeforeEach(func() {
-				req, err = http.NewRequest("GET", "http://localhost:8080/view/error", nil)
+				req, err = http.NewRequest("GET", "http://localhost:8080/cell/thiscelldoesnotexist", nil)
 				Expect(err).To(BeNil())
 				handler = handlers.ViewHandler(lobRepo)
 				handler(rr, req)

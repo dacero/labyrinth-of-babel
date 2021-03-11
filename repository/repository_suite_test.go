@@ -2,6 +2,7 @@ package repository_test
 
 import (
 	"testing"
+	"log"
 
 	"github.com/dacero/labyrinth-of-babel/models"
 	"github.com/dacero/labyrinth-of-babel/repository"
@@ -42,6 +43,7 @@ var _ = Describe("Repository", func() {
 			})
 
 			It("should contain all sources", func() {
+				log.Print(cell.Sources)
 				Expect(len(cell.Sources)).To(Equal(2))
 			})
 
@@ -197,6 +199,45 @@ var _ = Describe("Repository", func() {
 				Expect(update).To(Equal(int64(0)))
 			})
 		})
-
+	})
+	
+	Describe("When I add sources to a cell", func() {
+		var newSource models.Source
+		Context("given I add a propoer new source", func() {
+			BeforeEach(func() {
+				newSource = models.Source{Source:"New Source"}
+				cell, err = lobRepo.AddSourceToCell(cellId, newSource)
+			})
+			It("should return no error", func() {
+				Expect(err).To(BeNil())
+			})
+			It("should add the new source to the cell", func() {
+				Expect(len(cell.Sources)).To(Equal(3))
+			})
+		})
+		Context("given I add a duplicated source", func() {
+			BeforeEach(func() {
+				newSource = models.Source{Source:"Confucius"}
+				cell, err = lobRepo.AddSourceToCell(cellId, newSource)
+			})
+			It("should return no error", func() {
+				Expect(err).To(BeNil())
+			})
+			It("should NOT add the new source to the cell", func() {
+				Expect(len(cell.Sources)).To(Equal(3))
+			})
+		})
+		Context("given I add an empty source", func() {
+			BeforeEach(func() {
+				newSource = models.Source{Source:"    "} //spaces to test trimming
+				cell, err = lobRepo.AddSourceToCell(cellId, newSource)
+			})
+			It("should return no error", func() {
+				Expect(err).To(BeNil())
+			})
+			It("should NOT add the new source to the cell", func() {
+				Expect(len(cell.Sources)).To(Equal(3))
+			})
+		})
 	})
 })
