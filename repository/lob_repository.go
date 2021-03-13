@@ -18,8 +18,9 @@ type LobRepository interface {
 	GetCell(id string) (models.Cell, error)
 	//updates the cell with new content
 	UpdateCell(cell models.Cell) (int64, error)
-	//adds a source to a cell, returns the cell with updated sources
+	//adds and removes a source from a cell, returns the cell with updated sources
 	AddSourceToCell(cellId string, source models.Source) (models.Cell, error)
+	RemoveSourceFromCell(cellId string, source models.Source) (models.Cell, error)
 	//creates a new cell and returns its new id
 	NewCell(c models.Cell) (string, error)
 	//searches for sources that contain the terms passed
@@ -173,6 +174,19 @@ func (r *lobRepository) AddSourceToCell(cellId string, source models.Source) (mo
 	return r.GetCell(cellId)
 }
 
+func (r *lobRepository) RemoveSourceFromCell(cellId string, source models.Source) (models.Cell, error) {
+	stmt, err := r.getDB().Prepare("DELETE FROM cells_sources WHERE cells_id=? AND sources_source=?")
+	if err != nil {
+		cell, _ := r.GetCell(cellId) // unnecessary!!!
+		return cell, err
+	}
+	_, err = stmt.Exec(cellId, strings.TrimSpace(source.Source))
+	if err != nil {
+		cell, _ := r.GetCell(cellId) // unnecessary!!!
+		return cell, err
+	}
+	return r.GetCell(cellId)
+}
 
 func (r *lobRepository) NewCell(cell models.Cell) (string, error) {
 	//validations

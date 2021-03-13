@@ -269,4 +269,31 @@ var _ = Describe("Repository", func() {
 			})
 		})
 	})
+	Describe("When I remove a source from a cell", func() {
+		Context("given I provide a proper source", func() {
+			BeforeEach(func() {
+				source := models.Source{Source:"Confucius"}
+				cell, err = lobRepo.RemoveSourceFromCell(cellId, source)
+			})
+			It("should return no error", func() {
+				Expect(err).To(BeNil())
+			})
+			It("should remove the source from the cell", func() {
+				Expect(len(cell.Sources)).To(Equal(2))
+			})
+		})
+		Context("given I provide a source not linked to the cell", func() {
+			BeforeEach(func() {
+				source := models.Source{Source:"A different source"}
+				cell, err = lobRepo.RemoveSourceFromCell(cellId, source)
+			})
+			It("should return no error", func() {
+				Expect(err).To(BeNil())
+			})
+			It("should return the cell unchanged", func() {
+				Expect(len(cell.Sources)).To(Equal(2))
+			})
+		})
+	})
+
 })
