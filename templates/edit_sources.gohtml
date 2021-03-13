@@ -24,15 +24,21 @@
 		</header>
 
 		<main>
+			{{$cell := .}}
 			<article class="card">
 				<ul class="card-source-list">Source
 					{{range .Sources}}
-					<li class="card-source">{{.Source}}</li>
+					<li class="card-source">{{.Source}}
+						<form action="/cell/{{$cell.Id}}/removeSource" method="POST">
+							<input type="hidden" id="source" name="source" value="{{.Source}}">
+							<input type="submit" value="Delete">
+						</form>
+					</li>
 					{{end}}
 				</ul>
 			</article>
 			
-			<form action="/cell/{{.Id}}/source" method="POST">
+			<form action="/cell/{{.Id}}/addSource" method="POST">
 				<input type="hidden" id="cellId" name="cellId" value="{{.Id}}">
 				<label for="title">New source:</label><br>
 				<input type="text" id="source" name="source"><br>

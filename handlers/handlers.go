@@ -109,7 +109,7 @@ func AddSourceHandler(lob repository.LobRepository) func(w http.ResponseWriter, 
 func RemoveSourceHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cellId := mux.Vars(r)["id"]
-		source := models.Source{Source: r.PostFormValue("cellId") }
+		source := models.Source{Source: r.PostFormValue("source") }
 		_, err := lob.RemoveSourceFromCell(cellId, source)
 		if err != nil {
 			log.Printf("Error when removing source: %s", err)

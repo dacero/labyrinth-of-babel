@@ -41,8 +41,8 @@ var _ = Describe("Handler", func() {
 		router.HandleFunc("/cell/{id}", handlers.ViewHandler(lobRepository))
 		router.HandleFunc("/cell/{id}/edit", handlers.EditHandler(lobRepository))
 		router.HandleFunc("/cell/{id}/edit/sources", handlers.EditSourcesHandler(lobRepository))
-		router.HandleFunc("/cell/{id}/source", handlers.AddSourceHandler(lobRepository)).Methods("POST") //addSource
-		router.HandleFunc("/cell/{id}/source", handlers.RemoveSourceHandler(lobRepository)).Methods("DELETE") //addSource
+		router.HandleFunc("/cell/{id}/addSource", handlers.AddSourceHandler(lobRepository)).Methods("POST") //addSource
+		router.HandleFunc("/cell/{id}/removeSource", handlers.RemoveSourceHandler(lobRepository)).Methods("POST") //removeSource
 		router.HandleFunc("/save", handlers.SaveHandler(lobRepository))
 		router.HandleFunc("/new", handlers.CreateHandler(lobRepository))
 		router.HandleFunc("/sources", handlers.SourcesHandler(lobRepository))
@@ -225,7 +225,7 @@ var _ = Describe("Handler", func() {
 				form := url.Values{}
 				form.Add("cellId", cellId)
 				form.Add("source", "A new source to test")
-				req, err := http.NewRequest("POST", "http://localhost:8080/cell/"+cellId+"/source", strings.NewReader(form.Encode()))
+				req, err := http.NewRequest("POST", "http://localhost:8080/cell/"+cellId+"/addSource", strings.NewReader(form.Encode()))
 				Expect(err).To(BeNil())
 				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 				router.ServeHTTP(rr, req)
@@ -239,7 +239,7 @@ var _ = Describe("Handler", func() {
 				form := url.Values{}
 				form.Add("cellId", cellId)
 				form.Add("source", "    ")
-				req, err := http.NewRequest("POST", "http://localhost:8080/cell/"+cellId+"/source", strings.NewReader(form.Encode()))
+				req, err := http.NewRequest("POST", "http://localhost:8080/cell/"+cellId+"/addSource", strings.NewReader(form.Encode()))
 				Expect(err).To(BeNil())
 				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 				router.ServeHTTP(rr, req)
@@ -254,7 +254,7 @@ var _ = Describe("Handler", func() {
 			BeforeEach(func() {
 				form := url.Values{}
 				form.Add("source", "Confucius")
-				req, err := http.NewRequest("DELETE", "http://localhost:8080/cell/"+cellId+"/source", strings.NewReader(form.Encode()))
+				req, err := http.NewRequest("POST", "http://localhost:8080/cell/"+cellId+"/removeSource", strings.NewReader(form.Encode()))
 				Expect(err).To(BeNil())
 				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 				router.ServeHTTP(rr, req)
@@ -267,7 +267,7 @@ var _ = Describe("Handler", func() {
 			BeforeEach(func() {
 				form := url.Values{}
 				form.Add("source", "This source is not linked")
-				req, err := http.NewRequest("DELETE", "http://localhost:8080/cell/"+cellId+"/source", strings.NewReader(form.Encode()))
+				req, err := http.NewRequest("POST", "http://localhost:8080/cell/"+cellId+"/removeSource", strings.NewReader(form.Encode()))
 				Expect(err).To(BeNil())
 				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 				router.ServeHTTP(rr, req)
