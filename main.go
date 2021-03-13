@@ -48,6 +48,7 @@ func main() {
 	r.HandleFunc("/cell/{id}", handlers.ViewHandler(lobRepository))
 	r.HandleFunc("/cell/{id}/edit", handlers.EditHandler(lobRepository))
 	r.HandleFunc("/cell/{id}/edit/sources", handlers.EditSourcesHandler(lobRepository))
+	r.HandleFunc("/cell/{id}/source", handlers.AddSourceHandler(lobRepository)).Methods("POST") //addSource
 	r.HandleFunc("/save", handlers.SaveHandler(lobRepository))
 	r.HandleFunc("/new", handlers.CreateHandler(lobRepository))
 	r.HandleFunc("/sources", handlers.SourcesHandler(lobRepository))

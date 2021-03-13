@@ -32,7 +32,7 @@
 				</ul>
 			</article>
 			
-			<form action="/addSource" method="POST">
+			<form action="/cell/{{.Id}}/source" method="POST">
 				<input type="hidden" id="cellId" name="cellId" value="{{.Id}}">
 				<label for="title">New source:</label><br>
 				<input type="text" id="source" name="source"><br>

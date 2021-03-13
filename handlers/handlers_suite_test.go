@@ -41,6 +41,7 @@ var _ = Describe("Handler", func() {
 		router.HandleFunc("/cell/{id}", handlers.ViewHandler(lobRepository))
 		router.HandleFunc("/cell/{id}/edit", handlers.EditHandler(lobRepository))
 		router.HandleFunc("/cell/{id}/edit/sources", handlers.EditSourcesHandler(lobRepository))
+		router.HandleFunc("/cell/{id}/source", handlers.AddSourceHandler(lobRepository)).Methods("POST") //addSource
 		router.HandleFunc("/save", handlers.SaveHandler(lobRepository))
 		router.HandleFunc("/new", handlers.CreateHandler(lobRepository))
 		router.HandleFunc("/sources", handlers.SourcesHandler(lobRepository))
@@ -216,6 +217,37 @@ var _ = Describe("Handler", func() {
 			})
 		})
 	})
+	
+	Describe("Adding a source to a card", func() {
+		Context("with proper information", func() {
+			BeforeEach(func() {
+				form := url.Values{}
+				form.Add("cellId", cellId)
+				form.Add("source", "A new source to test")
+				req, err := http.NewRequest("POST", "http://localhost:8080/cell/"+cellId+"/source", strings.NewReader(form.Encode()))
+				Expect(err).To(BeNil())
+				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+				router.ServeHTTP(rr, req)
+			})
+			It("should return Status Found", func() {
+				Expect(rr.Code).To(Equal(http.StatusFound))
+			})
+		})
+		Context("with wrong information", func() {
+			BeforeEach(func() {
+				form := url.Values{}
+				form.Add("cellId", cellId)
+				form.Add("source", "    ")
+				req, err := http.NewRequest("POST", "http://localhost:8080/cell/"+cellId+"/source", strings.NewReader(form.Encode()))
+				Expect(err).To(BeNil())
+				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+				router.ServeHTTP(rr, req)
+			})
+			It("should also return Status Found", func() {
+				Expect(rr.Code).To(Equal(http.StatusFound))
+			})
+		})
+	})	
 
 })
 
