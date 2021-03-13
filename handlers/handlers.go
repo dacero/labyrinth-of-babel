@@ -221,6 +221,7 @@ func PageHandler() func(w http.ResponseWriter, r *http.Request) {
 func SearchSourcesHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		term := r.FormValue("term")
+		log.Printf("Searching for sources with: %s", term)
 		sources := lob.SearchSources(term)
 		returnString := "["
 		for _, source := range sources {
@@ -232,7 +233,7 @@ func SearchSourcesHandler(lob repository.LobRepository) func(w http.ResponseWrit
 	})
 }
 
-func RoomsHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
+func SearchRoomsHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		term := r.FormValue("term")
 		rooms := lob.SearchRooms(term)

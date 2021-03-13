@@ -10,8 +10,8 @@
 		<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 		<script>
 			  $( function() {
-				$( "#source" ).autocomplete({
-					  source: "/sources"
+				$( "#newSource" ).autocomplete({
+					  source: "/searchSources"
 					});
 	
 			  } );
@@ -41,7 +41,7 @@
 			<form action="/cell/{{.Id}}/addSource" method="POST">
 				<input type="hidden" id="cellId" name="cellId" value="{{.Id}}">
 				<label for="title">New source:</label><br>
-				<input type="text" id="source" name="source"><br>
+				<input type="text" id="newSource" name="source"><br>
 
 				<input type="submit" value="Submit">
 			</form>

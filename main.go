@@ -54,8 +54,8 @@ func main() {
 	r.HandleFunc("/cell/{id}/linkCell", handlers.LinkCellsHandler(lobRepository)).Methods("POST")
 	r.HandleFunc("/save", handlers.SaveHandler(lobRepository))
 	r.HandleFunc("/new", handlers.CreateHandler(lobRepository))
-	r.HandleFunc("/sources", handlers.SearchSourcesHandler(lobRepository))
-	r.HandleFunc("/rooms", handlers.RoomsHandler(lobRepository))
+	r.HandleFunc("/searchSources", handlers.SearchSourcesHandler(lobRepository))
+	r.HandleFunc("/searchRooms", handlers.SearchRoomsHandler(lobRepository))
 	r.HandleFunc("/page/{page}", handlers.PageHandler())
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
