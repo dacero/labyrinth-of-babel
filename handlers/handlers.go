@@ -62,7 +62,7 @@ func EditHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *ht
 	})
 }
 
-func EditSourcesHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
+func SourcesHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cellId := mux.Vars(r)["id"]
 		cell, err := lob.GetCell(cellId)
@@ -101,7 +101,7 @@ func AddSourceHandler(lob repository.LobRepository) func(w http.ResponseWriter, 
 			w.WriteHeader(http.StatusNotFound)
 			fmt.Fprint(w, string(notFound))
 		} else {
-			http.Redirect(w, r, "/cell/"+cellId+"/edit/sources", http.StatusFound)
+			http.Redirect(w, r, "/cell/"+cellId+"/sources", http.StatusFound)
 		}
 	})
 }
@@ -120,8 +120,45 @@ func RemoveSourceHandler(lob repository.LobRepository) func(w http.ResponseWrite
 			w.WriteHeader(http.StatusNotFound)
 			fmt.Fprint(w, string(notFound))
 		} else {
-			http.Redirect(w, r, "/cell/"+cellId+"/edit/sources", http.StatusFound)
+			http.Redirect(w, r, "/cell/"+cellId+"/sources", http.StatusFound)
 		}
+	})
+}
+
+func LinksHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cellId := mux.Vars(r)["id"]
+		cell, err := lob.GetCell(cellId)
+		if err != nil {
+			log.Printf("Error when returning card: %s", err)
+			notFound, err := ioutil.ReadFile("./templates/card_not_found.html")
+			if err != nil {
+				log.Printf("Error when returning card: %s", err)
+			}
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprint(w, string(notFound))
+		} else {
+			t, err := template.ParseFiles("./templates/edit_links.gohtml")
+			if err != nil {
+				log.Printf("Error when displaying links: %s", err)
+			}
+			err = t.Execute(w, cell)
+			if err != nil {
+				log.Printf("Error when displaying links: %s", err)
+			}
+		}
+	})
+}
+
+func LinkCellsHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cellA := mux.Vars(r)["id"]
+		cellB := r.PostFormValue("cellToLink")
+		err := lob.LinkCells(cellA, cellB)
+		if err != nil {
+			log.Printf("Error when linking cells: %s", err)
+		}
+		http.Redirect(w, r, "/cell/"+cellA+"/links", http.StatusFound)
 	})
 }
 
@@ -181,7 +218,7 @@ func PageHandler() func(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func SourcesHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
+func SearchSourcesHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		term := r.FormValue("term")
 		sources := lob.SearchSources(term)

@@ -47,12 +47,14 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/cell/{id}", handlers.ViewHandler(lobRepository))
 	r.HandleFunc("/cell/{id}/edit", handlers.EditHandler(lobRepository))
-	r.HandleFunc("/cell/{id}/edit/sources", handlers.EditSourcesHandler(lobRepository))
+	r.HandleFunc("/cell/{id}/sources", handlers.SourcesHandler(lobRepository))
 	r.HandleFunc("/cell/{id}/addSource", handlers.AddSourceHandler(lobRepository)).Methods("POST") //addSource
 	r.HandleFunc("/cell/{id}/removeSource", handlers.RemoveSourceHandler(lobRepository)).Methods("POST") //removeSource
+	r.HandleFunc("/cell/{id}/links", handlers.LinksHandler(lobRepository))
+	r.HandleFunc("/cell/{id}/linkCell", handlers.LinkCellsHandler(lobRepository)).Methods("POST")
 	r.HandleFunc("/save", handlers.SaveHandler(lobRepository))
 	r.HandleFunc("/new", handlers.CreateHandler(lobRepository))
-	r.HandleFunc("/sources", handlers.SourcesHandler(lobRepository))
+	r.HandleFunc("/sources", handlers.SearchSourcesHandler(lobRepository))
 	r.HandleFunc("/rooms", handlers.RoomsHandler(lobRepository))
 	r.HandleFunc("/page/{page}", handlers.PageHandler())
 	log.Fatal(http.ListenAndServe(":8080", r))
