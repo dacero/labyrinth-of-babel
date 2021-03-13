@@ -9,11 +9,12 @@ import (
 
 	"github.com/dacero/labyrinth-of-babel/repository"
 	"github.com/dacero/labyrinth-of-babel/models"
+	"github.com/gorilla/mux"
 )
 
 func ViewHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cellId := r.URL.Path[len("/view/"):]
+		cellId := mux.Vars(r)["id"]
 		cell, err := lob.GetCell(cellId)
 		if err != nil {
 			log.Printf("Error when returning card: %s", err)
@@ -38,7 +39,7 @@ func ViewHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *ht
 
 func EditHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cellId := r.URL.Path[len("/edit/"):]
+		cellId := mux.Vars(r)["id"]
 		cell, err := lob.GetCell(cellId)
 		if err != nil {
 			log.Printf("Error when returning card: %s", err)
@@ -61,6 +62,69 @@ func EditHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *ht
 	})
 }
 
+func EditSourcesHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cellId := mux.Vars(r)["id"]
+		cell, err := lob.GetCell(cellId)
+		if err != nil {
+			log.Printf("Error when returning card: %s", err)
+			notFound, err := ioutil.ReadFile("./templates/card_not_found.html")
+			if err != nil {
+				log.Printf("Error when returning card: %s", err)
+			}
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprint(w, string(notFound))
+		} else {
+			t, err := template.ParseFiles("./templates/edit_sources.gohtml")
+			if err != nil {
+				log.Printf("Error when returning card: %s", err)
+			}
+			err = t.Execute(w, cell)
+			if err != nil {
+				log.Printf("Error when returning card: %s", err)
+			}
+		}
+	})
+}
+
+func AddSourceHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cellId := mux.Vars(r)["id"]
+		newSource := models.Source{Source: r.PostFormValue("source") }
+		_, err := lob.AddSourceToCell(cellId, newSource)
+		if err != nil {
+			log.Printf("Error when adding source: %s", err)
+			notFound, err := ioutil.ReadFile("./templates/card_not_found.html")
+			if err != nil {
+				log.Printf("Error when returning card: %s", err)
+			}
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprint(w, string(notFound))
+		} else {
+			http.Redirect(w, r, "/cell/"+cellId+"/edit/sources", http.StatusFound)
+		}
+	})
+}
+
+func RemoveSourceHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cellId := mux.Vars(r)["id"]
+		source := models.Source{Source: r.PostFormValue("source") }
+		_, err := lob.RemoveSourceFromCell(cellId, source)
+		if err != nil {
+			log.Printf("Error when removing source: %s", err)
+			notFound, err := ioutil.ReadFile("./templates/card_not_found.html")
+			if err != nil {
+				log.Printf("Error when removing source: %s", err)
+			}
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprint(w, string(notFound))
+		} else {
+			http.Redirect(w, r, "/cell/"+cellId+"/edit/sources", http.StatusFound)
+		}
+	})
+}
+
 func SaveHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		//parse the form and create the cell
@@ -76,7 +140,7 @@ func SaveHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *ht
 			fmt.Fprintf(w, "Error when updating card: %s", err)
 		} 
 		//redirect to view the new cell card
-		http.Redirect(w, r, "/view/"+r.PostFormValue("cellId"), http.StatusFound)
+		http.Redirect(w, r, "/cell/"+r.PostFormValue("cellId"), http.StatusFound)
 	})
 }
 
@@ -96,13 +160,13 @@ func CreateHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *
 			fmt.Fprintf(w, "Error when creating card: %s", err)
 		} 
 		//redirect to view the new cell card
-		http.Redirect(w, r, "/view/"+newCellId, http.StatusFound)
+		http.Redirect(w, r, "/cell/"+newCellId+"/edit", http.StatusFound)
 	})
 }
 
 func PageHandler() func(w http.ResponseWriter, r *http.Request) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		pageName := r.URL.Path[len("/page/"):]
+		pageName := mux.Vars(r)["page"]
 		page, err := ioutil.ReadFile("./templates/" + pageName)
 		if err != nil {
 			notFound, err := ioutil.ReadFile("./templates/card_not_found.html")

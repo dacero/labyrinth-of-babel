@@ -11,6 +11,7 @@ import (
 	
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/gorilla/mux"
 	
 	"github.com/dacero/labyrinth-of-babel/repository"
 	"github.com/dacero/labyrinth-of-babel/handlers"
@@ -24,27 +25,37 @@ func TestRepository(t *testing.T) {
 
 var _ = Describe("Handler", func() {
 	var (
-		lobRepo repository.LobRepository
+		lobRepository repository.LobRepository
+		router	*mux.Router
 		req		*http.Request
 		rr		*httptest.ResponseRecorder
-		handler	func(w http.ResponseWriter, r *http.Request)
 		err     error
 		cellId  = "72aed05b-cb2d-4cad-bf70-05d8ae02a7bc"
 		body	string
 	)
 
 	BeforeEach(func() {
-		lobRepo = repository.NewLobRepository()
+		lobRepository = repository.NewLobRepository()
 		rr = httptest.NewRecorder()
+		router = mux.NewRouter()
+		router.HandleFunc("/cell/{id}", handlers.ViewHandler(lobRepository))
+		router.HandleFunc("/cell/{id}/edit", handlers.EditHandler(lobRepository))
+		router.HandleFunc("/cell/{id}/edit/sources", handlers.EditSourcesHandler(lobRepository))
+		router.HandleFunc("/cell/{id}/addSource", handlers.AddSourceHandler(lobRepository)).Methods("POST") //addSource
+		router.HandleFunc("/cell/{id}/removeSource", handlers.RemoveSourceHandler(lobRepository)).Methods("POST") //removeSource
+		router.HandleFunc("/save", handlers.SaveHandler(lobRepository))
+		router.HandleFunc("/new", handlers.CreateHandler(lobRepository))
+		router.HandleFunc("/sources", handlers.SourcesHandler(lobRepository))
+		router.HandleFunc("/rooms", handlers.RoomsHandler(lobRepository))
+		router.HandleFunc("/page/{page}", handlers.PageHandler())
 	})
 
 	Describe("Viewing a card", func() {
 		Context("for a cell that exists", func() {
 			BeforeEach(func() {
-				req, err = http.NewRequest("GET", "http://localhost:8080/view/"+cellId, nil)
+				req, err = http.NewRequest("GET", "http://localhost:8080/cell/"+cellId, nil)
 				Expect(err).To(BeNil())
-				handler = handlers.ViewHandler(lobRepo)
-				handler(rr, req)
+				router.ServeHTTP(rr, req)
 				body = rr.Body.String()
 			})
 			It("should return Status OK", func() {
@@ -70,10 +81,9 @@ var _ = Describe("Handler", func() {
 		})
 		Context("for a cell that does not exist", func() {
 			BeforeEach(func() {
-				req, err = http.NewRequest("GET", "http://localhost:8080/view/error", nil)
+				req, err = http.NewRequest("GET", "http://localhost:8080/cell/thiscelldoesnotexist", nil)
 				Expect(err).To(BeNil())
-				handler = handlers.ViewHandler(lobRepo)
-				handler(rr, req)
+				router.ServeHTTP(rr, req)
 			})
 			It("should return NOT FOUND error", func() {
 				Expect(rr.Code).To(Equal(http.StatusNotFound))
@@ -89,11 +99,10 @@ var _ = Describe("Handler", func() {
 				form.Add("title", "The new cell")
 				form.Add("body", "This is the new cell I'm creating")
 				form.Add("source", "Confucius")
-				req, err := http.NewRequest("POST", "http://localhost:8080/newCell/", strings.NewReader(form.Encode()))
+				req, err := http.NewRequest("POST", "http://localhost:8080/new", strings.NewReader(form.Encode()))
 				Expect(err).To(BeNil())
 				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-				handler = handlers.CreateHandler(lobRepo)
-				handler(rr, req)
+				router.ServeHTTP(rr, req)
 				body = rr.Body.String()
 			})
 			It("should return Status Found", func() {
@@ -114,11 +123,10 @@ var _ = Describe("Handler", func() {
 				form.Add("title", "The new cell")
 				form.Add("body", "")
 				form.Add("source", "Confucius")
-				req, err := http.NewRequest("POST", "http://localhost:8080/newCell/", strings.NewReader(form.Encode()))
+				req, err := http.NewRequest("POST", "http://localhost:8080/new", strings.NewReader(form.Encode()))
 				Expect(err).To(BeNil())
 				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-				handler = handlers.CreateHandler(lobRepo)
-				handler(rr, req)
+				router.ServeHTTP(rr, req)
 			})
 			It("should return StatusBadRequest", func() {
 				Expect(rr.Code).To(Equal(http.StatusBadRequest))
@@ -131,11 +139,10 @@ var _ = Describe("Handler", func() {
 				form.Add("title", "The new cell")
 				form.Add("body", "This one does have a body")
 				form.Add("source", "Confucius")
-				req, err := http.NewRequest("POST", "http://localhost:8080/newCell/", strings.NewReader(form.Encode()))
+				req, err := http.NewRequest("POST", "http://localhost:8080/new", strings.NewReader(form.Encode()))
 				Expect(err).To(BeNil())
 				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-				handler = handlers.CreateHandler(lobRepo)
-				handler(rr, req)
+				router.ServeHTTP(rr, req)
 			})
 			It("should return StatusBadRequest", func() {
 				Expect(rr.Code).To(Equal(http.StatusBadRequest))
@@ -148,8 +155,7 @@ var _ = Describe("Handler", func() {
 			BeforeEach(func() {
 				req, err := http.NewRequest("GET", "http://localhost:8080/sources?term=Confu", nil)
 				Expect(err).To(BeNil())
-				handler = handlers.SourcesHandler(lobRepo)
-				handler(rr, req)
+				router.ServeHTTP(rr, req)
 				body = rr.Body.String()
 			})
 			It("should return a proper json", func() {
@@ -164,10 +170,9 @@ var _ = Describe("Handler", func() {
 	Describe("Searching for rooms", func() {
 		Context("with proper terms", func() {
 			BeforeEach(func() {
-				req, err := http.NewRequest("GET", "http://localhost:8080/sources?term=Habita", nil)
+				req, err := http.NewRequest("GET", "http://localhost:8080/rooms?term=Habita", nil)
 				Expect(err).To(BeNil())
-				handler = handlers.RoomsHandler(lobRepo)
-				handler(rr, req)
+				router.ServeHTTP(rr, req)
 				body = rr.Body.String()
 			})
 			It("should return a proper json", func() {
@@ -187,11 +192,10 @@ var _ = Describe("Handler", func() {
 				form.Add("room", "This is a room")
 				form.Add("title", "Updated title")
 				form.Add("body", "I'm updating this cell")
-				req, err := http.NewRequest("POST", "http://localhost:8080/save/", strings.NewReader(form.Encode()))
+				req, err := http.NewRequest("POST", "http://localhost:8080/save", strings.NewReader(form.Encode()))
 				Expect(err).To(BeNil())
 				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-				handler = handlers.SaveHandler(lobRepo)
-				handler(rr, req)
+				router.ServeHTTP(rr, req)
 			})
 			It("should return Status Found", func() {
 				Expect(rr.Code).To(Equal(http.StatusFound))
@@ -204,14 +208,72 @@ var _ = Describe("Handler", func() {
 				form.Add("room", "  ")
 				form.Add("title", "Updated title")
 				form.Add("body", "  ")
-				req, err := http.NewRequest("POST", "http://localhost:8080/save/", strings.NewReader(form.Encode()))
+				req, err := http.NewRequest("POST", "http://localhost:8080/save", strings.NewReader(form.Encode()))
 				Expect(err).To(BeNil())
 				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-				handler = handlers.SaveHandler(lobRepo)
-				handler(rr, req)
+				router.ServeHTTP(rr, req)
 			})
 			It("should return Status Found", func() {
 				Expect(rr.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
+	})
+	
+	Describe("Adding a source to a card", func() {
+		Context("with proper information", func() {
+			BeforeEach(func() {
+				form := url.Values{}
+				form.Add("cellId", cellId)
+				form.Add("source", "A new source to test")
+				req, err := http.NewRequest("POST", "http://localhost:8080/cell/"+cellId+"/addSource", strings.NewReader(form.Encode()))
+				Expect(err).To(BeNil())
+				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+				router.ServeHTTP(rr, req)
+			})
+			It("should return Status Found", func() {
+				Expect(rr.Code).To(Equal(http.StatusFound))
+			})
+		})
+		Context("with wrong information", func() {
+			BeforeEach(func() {
+				form := url.Values{}
+				form.Add("cellId", cellId)
+				form.Add("source", "    ")
+				req, err := http.NewRequest("POST", "http://localhost:8080/cell/"+cellId+"/addSource", strings.NewReader(form.Encode()))
+				Expect(err).To(BeNil())
+				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+				router.ServeHTTP(rr, req)
+			})
+			It("should also return Status Found", func() {
+				Expect(rr.Code).To(Equal(http.StatusFound))
+			})
+		})
+	})
+	Describe("When removing a source from a card", func() {
+		Context("given I provide a proper source", func() {
+			BeforeEach(func() {
+				form := url.Values{}
+				form.Add("source", "Confucius")
+				req, err := http.NewRequest("POST", "http://localhost:8080/cell/"+cellId+"/removeSource", strings.NewReader(form.Encode()))
+				Expect(err).To(BeNil())
+				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+				router.ServeHTTP(rr, req)
+			})
+			It("should return Status Found", func() {
+				Expect(rr.Code).To(Equal(http.StatusFound))
+			})
+		})
+		Context("given I provide a source not linked to the cell", func() {
+			BeforeEach(func() {
+				form := url.Values{}
+				form.Add("source", "This source is not linked")
+				req, err := http.NewRequest("POST", "http://localhost:8080/cell/"+cellId+"/removeSource", strings.NewReader(form.Encode()))
+				Expect(err).To(BeNil())
+				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+				router.ServeHTTP(rr, req)
+			})
+			It("should also return Status Found", func() {
+				Expect(rr.Code).To(Equal(http.StatusFound))
 			})
 		})
 	})

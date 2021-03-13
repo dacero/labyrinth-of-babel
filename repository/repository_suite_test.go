@@ -2,6 +2,10 @@ package repository_test
 
 import (
 	"testing"
+	"log"
+	"database/sql"
+	"strings"
+	"io/ioutil"
 
 	"github.com/dacero/labyrinth-of-babel/models"
 	"github.com/dacero/labyrinth-of-babel/repository"
@@ -9,6 +13,32 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
+
+func init() {
+	log.Print("Initializing db... ")
+	db, err := sql.Open("mysql", "root:secret@tcp(mysql:3306)/")
+	if err != nil {
+		log.Fatal("Error when opening DB: ", err)
+	}
+	defer db.Close()
+
+	file, err := ioutil.ReadFile("./db/labyrinth_of_babel.sql")
+	if err != nil {
+		// handle error
+		log.Fatal("Error when initializing DB: ", err)
+	}
+
+	for _, request := range strings.Split(string(file), ";") {
+		request = strings.TrimSpace(request)
+		if request != "" {
+			_, err := db.Exec(request)
+			if err != nil {
+				log.Fatalf("Error when initializing DB\n Query %s returned error: %s", request, err)
+			}
+		}
+	}
+	log.Print("Finished initiatlizing db!")
+}
 
 func TestRepository(t *testing.T) {
 	RegisterFailHandler(Fail)
@@ -42,6 +72,7 @@ var _ = Describe("Repository", func() {
 			})
 
 			It("should contain all sources", func() {
+				log.Print(cell.Sources)
 				Expect(len(cell.Sources)).To(Equal(2))
 			})
 
@@ -197,6 +228,72 @@ var _ = Describe("Repository", func() {
 				Expect(update).To(Equal(int64(0)))
 			})
 		})
-
 	})
+	
+	Describe("When I add sources to a cell", func() {
+		var newSource models.Source
+		Context("given I add a propoer new source", func() {
+			BeforeEach(func() {
+				newSource = models.Source{Source:"New Source"}
+				cell, err = lobRepo.AddSourceToCell(cellId, newSource)
+			})
+			It("should return no error", func() {
+				Expect(err).To(BeNil())
+			})
+			It("should add the new source to the cell", func() {
+				Expect(len(cell.Sources)).To(Equal(3))
+			})
+		})
+		Context("given I add a duplicated source", func() {
+			BeforeEach(func() {
+				newSource = models.Source{Source:"Confucius"}
+				cell, err = lobRepo.AddSourceToCell(cellId, newSource)
+			})
+			It("should return no error", func() {
+				Expect(err).To(BeNil())
+			})
+			It("should NOT add the new source to the cell", func() {
+				Expect(len(cell.Sources)).To(Equal(3))
+			})
+		})
+		Context("given I add an empty source", func() {
+			BeforeEach(func() {
+				newSource = models.Source{Source:"    "} //spaces to test trimming
+				cell, err = lobRepo.AddSourceToCell(cellId, newSource)
+			})
+			It("should return no error", func() {
+				Expect(err).To(BeNil())
+			})
+			It("should NOT add the new source to the cell", func() {
+				Expect(len(cell.Sources)).To(Equal(3))
+			})
+		})
+	})
+	Describe("When I remove a source from a cell", func() {
+		Context("given I provide a proper source", func() {
+			BeforeEach(func() {
+				source := models.Source{Source:"Confucius"}
+				cell, err = lobRepo.RemoveSourceFromCell(cellId, source)
+			})
+			It("should return no error", func() {
+				Expect(err).To(BeNil())
+			})
+			It("should remove the source from the cell", func() {
+				Expect(len(cell.Sources)).To(Equal(2))
+			})
+		})
+		Context("given I provide a source not linked to the cell", func() {
+			BeforeEach(func() {
+				source := models.Source{Source:"A different source"}
+				cell, err = lobRepo.RemoveSourceFromCell(cellId, source)
+			})
+			It("should return no error", func() {
+				Expect(err).To(BeNil())
+			})
+			It("should return the cell unchanged", func() {
+				Expect(len(cell.Sources)).To(Equal(2))
+			})
+		})
+	})
+
 })

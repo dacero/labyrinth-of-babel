@@ -9,6 +9,7 @@ import (
 
 	"github.com/dacero/labyrinth-of-babel/repository"
 	"github.com/dacero/labyrinth-of-babel/handlers"
+	"github.com/gorilla/mux"
 	
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -43,12 +44,16 @@ func init() {
 func main() {
 	lobRepository := repository.NewLobRepository()
 	defer lobRepository.Close()
-	http.HandleFunc("/view/", handlers.ViewHandler(lobRepository))
-	http.HandleFunc("/edit/", handlers.EditHandler(lobRepository))
-	http.HandleFunc("/save", handlers.SaveHandler(lobRepository))
-	http.HandleFunc("/new", handlers.CreateHandler(lobRepository))
-	http.HandleFunc("/sources", handlers.SourcesHandler(lobRepository))
-	http.HandleFunc("/rooms", handlers.RoomsHandler(lobRepository))
-	http.HandleFunc("/page/", handlers.PageHandler())
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	r := mux.NewRouter()
+	r.HandleFunc("/cell/{id}", handlers.ViewHandler(lobRepository))
+	r.HandleFunc("/cell/{id}/edit", handlers.EditHandler(lobRepository))
+	r.HandleFunc("/cell/{id}/edit/sources", handlers.EditSourcesHandler(lobRepository))
+	r.HandleFunc("/cell/{id}/addSource", handlers.AddSourceHandler(lobRepository)).Methods("POST") //addSource
+	r.HandleFunc("/cell/{id}/removeSource", handlers.RemoveSourceHandler(lobRepository)).Methods("POST") //removeSource
+	r.HandleFunc("/save", handlers.SaveHandler(lobRepository))
+	r.HandleFunc("/new", handlers.CreateHandler(lobRepository))
+	r.HandleFunc("/sources", handlers.SourcesHandler(lobRepository))
+	r.HandleFunc("/rooms", handlers.RoomsHandler(lobRepository))
+	r.HandleFunc("/page/{page}", handlers.PageHandler())
+	log.Fatal(http.ListenAndServe(":8080", r))
 }
