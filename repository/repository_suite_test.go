@@ -14,7 +14,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func init() {
+func resetDB() {
 	log.Print("Initializing db... ")
 	db, err := sql.Open("mysql", "root:secret@tcp(mysql:3306)/")
 	if err != nil {
@@ -41,6 +41,7 @@ func init() {
 }
 
 func TestRepository(t *testing.T) {
+	resetDB()
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Repository Suite")
 }
@@ -294,6 +295,37 @@ var _ = Describe("Repository", func() {
 				Expect(len(cell.Sources)).To(Equal(2))
 			})
 		})
+	})
+	
+	Describe("When I link 2 cells", func() {
+		var cellA string
+		var cellB string
+		Context("given they exist and are not linked", func() {
+			BeforeEach(func() {
+				cellA = "417ecfe7-d2b4-4e43-afd4-dbf5f431d97d"
+				cellB = "df38bd04-0ec4-41bf-9e53-d0eeb95a4939"
+				err = lobRepo.LinkCells(cellA, cellB)
+			})
+			It("should return no error", func() {
+				Expect(err).To(BeNil())
+			})
+			It("should link the 2 cells", func() {
+				areLinked, err := lobRepo.CheckLink(cellA, cellB)
+				Expect(err).To(BeNil())
+				Expect(areLinked).To(Equal(true))
+			})
+		})
+		Context("given they are already linked", func() {
+			BeforeEach(func() {
+				cellA = "417ecfe7-d2b4-4e43-afd4-dbf5f431d97d"
+				cellB = "72aed05b-cb2d-4cad-bf70-05d8ae02a7bc"
+				err = lobRepo.LinkCells(cellA, cellB)
+			})
+			It("should return error", func() {
+				Expect(err).ToNot(BeNil())
+			})
+		})
+
 	})
 
 })

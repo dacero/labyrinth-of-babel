@@ -21,6 +21,10 @@ type LobRepository interface {
 	//adds and removes a source from a cell, returns the cell with updated sources
 	AddSourceToCell(cellId string, source models.Source) (models.Cell, error)
 	RemoveSourceFromCell(cellId string, source models.Source) (models.Cell, error)
+	//links 2 cells
+	LinkCells(idA string, idB string) (error)
+	//checks if two cells are linked
+	CheckLink(idA string, idB string) (bool, error)
 	//creates a new cell and returns its new id
 	NewCell(c models.Cell) (string, error)
 	//searches for sources that contain the terms passed
@@ -156,6 +160,37 @@ func (r *lobRepository) UpdateCell(cell models.Cell) (int64, error) {
 		return 0, err
 	}
 	return result.RowsAffected()
+}
+
+func (r *lobRepository) LinkCells(idA string, idB string) (error) {
+	//verify that the cells are not already linked
+	linked, err := r.CheckLink(idA, idB)
+	if err != nil {
+		return err
+	}
+	if linked {
+		return errors.New("Tried linking cells already linked")
+	}
+	//link the cells
+	stmt, err := r.getDB().Prepare("INSERT INTO cells_links(cells_a, cells_b) VALUES (?, ?)")
+	if err != nil {
+		return err
+	}
+	_, err = stmt.Exec(idA, idB)
+	return err
+}
+
+func (r *lobRepository) CheckLink(idA string, idB string) (bool, error) {
+	var numLinks int
+	row := r.getDB().QueryRow("SELECT COUNT(*) FROM cells_links WHERE (cells_a=? AND cells_b=?) OR (cells_a=? AND cells_b=?)", idA, idB, idB, idA)
+	err := row.Scan(&numLinks)
+	if err != nil {
+		log.Print(err)
+		return false, err
+	}
+	if numLinks == 0 { return false, nil }
+	if numLinks == 1 { return true, nil }
+	return true, errors.New("Too many links")
 }
 
 func (r *lobRepository) AddSourceToCell(cellId string, source models.Source) (models.Cell, error) {
