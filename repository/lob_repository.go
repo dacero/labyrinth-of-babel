@@ -32,6 +32,8 @@ type LobRepository interface {
 	SearchSources(term string) []models.Source
 	//searches for rooms that contain the terms passed
 	SearchRooms(term string) []string
+	//searches for cells that contain the terms passed
+	SearchCells(term string) []models.CellLink
 	//closes the database
 	Close()
 }
@@ -118,28 +120,31 @@ func (r *lobRepository) getCellLinks(id string) []models.CellLink {
 	defer rows.Close()
 
 	for rows.Next() {
-		var id, title, body, text string
+		var id, title, body string
 		var update_time time.Time
 		err := rows.Scan(&id, &title, &body, &update_time)
 		if err != nil {
 			log.Fatal(err)
 		}
-		if title == "" {
-			r := []rune(body)
-			if len(r) > 60 {
-				text = string(r[0:50]) + "..."
-			} else {
-				text = body
-			}
-		} else {
-			text = title
-		}
-		links = append(links, models.CellLink{Id: id, Text: text})
+		links = append(links, models.CellLink{Id: id, Text: shrinkCellText(title, body)})
 	}
 	if err := rows.Err(); err != nil {
 		log.Fatal(err)
 	}
 	return links
+}
+
+func shrinkCellText(title string, body string) (string) {
+	if title != "" {
+		return title
+	} else {
+		r := []rune(body)
+		if len(r) < 60 {
+			return body
+		} else {
+			return string(r[0:50]) + "..."
+		}
+	}
 }
 
 func (r *lobRepository) UpdateCell(cell models.Cell) (int64, error) {
@@ -375,4 +380,31 @@ func (r *lobRepository) SearchRooms(term string) []string {
 		log.Fatal(err)
 	}
 	return rooms
+}
+
+func (r *lobRepository) SearchCells(term string) []models.CellLink {
+	var cells []models.CellLink
+	rows, err := r.getDB().Query(`SELECT id, title, body 
+		FROM cells
+		WHERE title LIKE ? OR body LIKE ?`, "%" + term + "%", "%" + term + "%")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var cell models.CellLink
+		var title, body string
+		err := rows.Scan(&cell.Id, &title, &body)
+		if err != nil {
+			log.Fatal(err)
+		}
+		//transform the title and body into a unified text
+		cell.Text = shrinkCellText(title, body)
+		cells = append(cells, cell)
+	}
+	if err := rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+	return cells
 }

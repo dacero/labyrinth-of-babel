@@ -92,6 +92,24 @@ var _ = Describe("Repository", func() {
 		})
 	})
 	
+	Describe("When I search for cells", func() {
+		Context("given I provide a term only used in one", func() {
+			It("should return only one cell", func() {
+				term := "shorter"
+				cells := lobRepo.SearchCells(term)
+				Expect(len(cells)).To(Equal(1))
+			})
+		})
+		Context("given I provide a term only used in all", func() {
+			It("should return three cells", func() {
+				term := "idea"
+				cells := lobRepo.SearchCells(term)
+				Expect(len(cells)).To(Equal(3))
+				log.Print(cells)
+			})
+		})
+	})
+	
 	Describe("Creating a new cell", func() {
 		Context("with proper information", func() {
 			BeforeEach(func() {
@@ -346,5 +364,4 @@ var _ = Describe("Repository", func() {
 			})
 		})
 	})
-
 })
