@@ -3,6 +3,9 @@ package repository_test
 import (
 	"testing"
 	"log"
+	"database/sql"
+	"strings"
+	"io/ioutil"
 
 	"github.com/dacero/labyrinth-of-babel/models"
 	"github.com/dacero/labyrinth-of-babel/repository"
@@ -10,6 +13,32 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
+
+func init() {
+	log.Print("Initializing db... ")
+	db, err := sql.Open("mysql", "root:secret@tcp(mysql:3306)/")
+	if err != nil {
+		log.Fatal("Error when opening DB: ", err)
+	}
+	defer db.Close()
+
+	file, err := ioutil.ReadFile("./db/labyrinth_of_babel.sql")
+	if err != nil {
+		// handle error
+		log.Fatal("Error when initializing DB: ", err)
+	}
+
+	for _, request := range strings.Split(string(file), ";") {
+		request = strings.TrimSpace(request)
+		if request != "" {
+			_, err := db.Exec(request)
+			if err != nil {
+				log.Fatalf("Error when initializing DB\n Query %s returned error: %s", request, err)
+			}
+		}
+	}
+	log.Print("Finished initiatlizing db!")
+}
 
 func TestRepository(t *testing.T) {
 	RegisterFailHandler(Fail)
