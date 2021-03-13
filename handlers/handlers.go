@@ -106,6 +106,25 @@ func AddSourceHandler(lob repository.LobRepository) func(w http.ResponseWriter, 
 	})
 }
 
+func RemoveSourceHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cellId := mux.Vars(r)["id"]
+		source := models.Source{Source: r.PostFormValue("cellId") }
+		_, err := lob.RemoveSourceFromCell(cellId, source)
+		if err != nil {
+			log.Printf("Error when removing source: %s", err)
+			notFound, err := ioutil.ReadFile("./templates/card_not_found.html")
+			if err != nil {
+				log.Printf("Error when removing source: %s", err)
+			}
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprint(w, string(notFound))
+		} else {
+			http.Redirect(w, r, "/cell/"+cellId+"/edit/sources", http.StatusFound)
+		}
+	})
+}
+
 func SaveHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		//parse the form and create the cell

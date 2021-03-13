@@ -42,6 +42,7 @@ var _ = Describe("Handler", func() {
 		router.HandleFunc("/cell/{id}/edit", handlers.EditHandler(lobRepository))
 		router.HandleFunc("/cell/{id}/edit/sources", handlers.EditSourcesHandler(lobRepository))
 		router.HandleFunc("/cell/{id}/source", handlers.AddSourceHandler(lobRepository)).Methods("POST") //addSource
+		router.HandleFunc("/cell/{id}/source", handlers.RemoveSourceHandler(lobRepository)).Methods("DELETE") //addSource
 		router.HandleFunc("/save", handlers.SaveHandler(lobRepository))
 		router.HandleFunc("/new", handlers.CreateHandler(lobRepository))
 		router.HandleFunc("/sources", handlers.SourcesHandler(lobRepository))
@@ -247,7 +248,35 @@ var _ = Describe("Handler", func() {
 				Expect(rr.Code).To(Equal(http.StatusFound))
 			})
 		})
-	})	
+	})
+	Describe("When removing a source from a card", func() {
+		Context("given I provide a proper source", func() {
+			BeforeEach(func() {
+				form := url.Values{}
+				form.Add("source", "Confucius")
+				req, err := http.NewRequest("DELETE", "http://localhost:8080/cell/"+cellId+"/source", strings.NewReader(form.Encode()))
+				Expect(err).To(BeNil())
+				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+				router.ServeHTTP(rr, req)
+			})
+			It("should return Status Found", func() {
+				Expect(rr.Code).To(Equal(http.StatusFound))
+			})
+		})
+		Context("given I provide a source not linked to the cell", func() {
+			BeforeEach(func() {
+				form := url.Values{}
+				form.Add("source", "This source is not linked")
+				req, err := http.NewRequest("DELETE", "http://localhost:8080/cell/"+cellId+"/source", strings.NewReader(form.Encode()))
+				Expect(err).To(BeNil())
+				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+				router.ServeHTTP(rr, req)
+			})
+			It("should also return Status Found", func() {
+				Expect(rr.Code).To(Equal(http.StatusFound))
+			})
+		})
+	})
 
 })
 
