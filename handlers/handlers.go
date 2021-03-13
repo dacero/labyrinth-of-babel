@@ -162,6 +162,18 @@ func LinkCellsHandler(lob repository.LobRepository) func(w http.ResponseWriter, 
 	})
 }
 
+func UnlinkCellsHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cellA := mux.Vars(r)["id"]
+		cellB := r.PostFormValue("cellToUnlink")
+		err := lob.UnlinkCells(cellA, cellB)
+		if err != nil {
+			log.Printf("Error when linking cells: %s", err)
+		}
+		http.Redirect(w, r, "/cell/"+cellA+"/links", http.StatusFound)
+	})
+}
+
 func SaveHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		//parse the form and create the cell
@@ -221,7 +233,6 @@ func PageHandler() func(w http.ResponseWriter, r *http.Request) {
 func SearchSourcesHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		term := r.FormValue("term")
-		log.Printf("Searching for sources with: %s", term)
 		sources := lob.SearchSources(term)
 		returnString := "["
 		for _, source := range sources {

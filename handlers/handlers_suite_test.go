@@ -74,6 +74,7 @@ var _ = Describe("Handler", func() {
 		router.HandleFunc("/cell/{id}/addSource", handlers.AddSourceHandler(lobRepository)).Methods("POST") //addSource
 		router.HandleFunc("/cell/{id}/removeSource", handlers.RemoveSourceHandler(lobRepository)).Methods("POST") //removeSource
 		router.HandleFunc("/cell/{id}/linkCell", handlers.LinkCellsHandler(lobRepository)).Methods("POST")
+		router.HandleFunc("/cell/{id}/unlinkCell", handlers.UnlinkCellsHandler(lobRepository)).Methods("POST")
 		router.HandleFunc("/save", handlers.SaveHandler(lobRepository))
 		router.HandleFunc("/new", handlers.CreateHandler(lobRepository))
 		router.HandleFunc("/sources", handlers.SearchSourcesHandler(lobRepository))
@@ -315,6 +316,22 @@ var _ = Describe("Handler", func() {
 				form := url.Values{}
 				form.Add("cellToLink", "df38bd04-0ec4-41bf-9e53-d0eeb95a4939")
 				req, err := http.NewRequest("POST", "http://localhost:8080/cell/"+"417ecfe7-d2b4-4e43-afd4-dbf5f431d97d"+"/linkCell", strings.NewReader(form.Encode()))
+				Expect(err).To(BeNil())
+				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+				router.ServeHTTP(rr, req)
+			})
+			It("should return Status Found", func() {
+				Expect(rr.Code).To(Equal(http.StatusFound))
+			})
+		})
+	})
+	
+	Describe("When unlinking two cells", func() {
+		Context("given I provide a proper cell", func() {
+			BeforeEach(func() {
+				form := url.Values{}
+				form.Add("cellToUnlink", "417ecfe7-d2b4-4e43-afd4-dbf5f431d97d")
+				req, err := http.NewRequest("POST", "http://localhost:8080/cell/"+cellId+"/unlinkCell", strings.NewReader(form.Encode()))
 				Expect(err).To(BeNil())
 				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 				router.ServeHTTP(rr, req)

@@ -29,9 +29,9 @@
 				<ul class="card-link-list">Links
 					{{range .Links}}
 					<li class="card-link">{{.Text}}
-						<form action="/cell/{{$cell.Id}}/unlinkCells" method="POST">
+						<form action="/cell/{{$cell.Id}}/unlinkCell" method="POST">
 							<input type="hidden" id="cellToUnlink" name="cellToUnlink" value="{{.Id}}">
-							<input type="submit" value="Delete">
+							<input type="submit" value="Unlink">
 						</form>
 					</li>
 					{{end}}
