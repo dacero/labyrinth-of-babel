@@ -325,7 +325,26 @@ var _ = Describe("Repository", func() {
 				Expect(err).ToNot(BeNil())
 			})
 		})
-
+	})
+	
+	Describe("When I unlink 2 cells", func() {
+		var cellA string
+		var cellB string
+		Context("given they exist and are linked", func() {
+			BeforeEach(func() {
+				cellA = "417ecfe7-d2b4-4e43-afd4-dbf5f431d97d"
+				cellB = "72aed05b-cb2d-4cad-bf70-05d8ae02a7bc"
+				err = lobRepo.UnlinkCells(cellA, cellB)
+			})
+			It("should return no error", func() {
+				Expect(err).To(BeNil())
+			})
+			It("should link the 2 cells", func() {
+				areLinked, err := lobRepo.CheckLink(cellA, cellB)
+				Expect(err).To(BeNil())
+				Expect(areLinked).To(Equal(false))
+			})
+		})
 	})
 
 })

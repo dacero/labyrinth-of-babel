@@ -77,7 +77,7 @@ var _ = Describe("Handler", func() {
 		router.HandleFunc("/save", handlers.SaveHandler(lobRepository))
 		router.HandleFunc("/new", handlers.CreateHandler(lobRepository))
 		router.HandleFunc("/sources", handlers.SearchSourcesHandler(lobRepository))
-		router.HandleFunc("/rooms", handlers.RoomsHandler(lobRepository))
+		router.HandleFunc("/rooms", handlers.SearchRoomsHandler(lobRepository))
 		router.HandleFunc("/page/{page}", handlers.PageHandler())
 	})
 

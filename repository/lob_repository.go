@@ -21,8 +21,9 @@ type LobRepository interface {
 	//adds and removes a source from a cell, returns the cell with updated sources
 	AddSourceToCell(cellId string, source models.Source) (models.Cell, error)
 	RemoveSourceFromCell(cellId string, source models.Source) (models.Cell, error)
-	//links 2 cells
+	//links or unlink 2 cells
 	LinkCells(idA string, idB string) (error)
+	UnlinkCells(idA string, idB string) (error)
 	//checks if two cells are linked
 	CheckLink(idA string, idB string) (bool, error)
 	//creates a new cell and returns its new id
@@ -177,6 +178,16 @@ func (r *lobRepository) LinkCells(idA string, idB string) (error) {
 		return err
 	}
 	_, err = stmt.Exec(idA, idB)
+	return err
+}
+
+func (r *lobRepository) UnlinkCells(idA string, idB string) (error) {
+	//link the cells
+	stmt, err := r.getDB().Prepare("DELETE FROM cells_links WHERE (cells_a = ? AND cells_b = ?) OR (cells_a = ? AND cells_b = ?)")
+	if err != nil {
+		return err
+	}
+	_, err = stmt.Exec(idA, idB, idB, idA)
 	return err
 }
 
