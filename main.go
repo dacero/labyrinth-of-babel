@@ -57,6 +57,7 @@ func main() {
 	r.HandleFunc("/new", handlers.CreateHandler(lobRepository))
 	r.HandleFunc("/searchSources", handlers.SearchSourcesHandler(lobRepository))
 	r.HandleFunc("/searchRooms", handlers.SearchRoomsHandler(lobRepository))
+	r.HandleFunc("/searchCells", handlers.SearchCellsHandler(lobRepository))
 	r.HandleFunc("/page/{page}", handlers.PageHandler())
 	log.Fatal(http.ListenAndServe(":8080", r))
 }

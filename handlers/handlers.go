@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"text/template"
+	"encoding/json"
 
 	"github.com/dacero/labyrinth-of-babel/repository"
 	"github.com/dacero/labyrinth-of-babel/models"
@@ -255,5 +256,24 @@ func SearchRoomsHandler(lob repository.LobRepository) func(w http.ResponseWriter
 		returnString = returnString[:len(returnString)-1] + "]"
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, returnString)
+	})
+}
+
+func SearchCellsHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		term := r.FormValue("term")
+		log.Printf("Searching for cells with %s", term)
+		cells := lob.SearchCells(term)
+		type CellLinkAlias struct {
+			Id   string `json:"value"`
+			Text string `json:"label"`
+		}
+		var alias = make([]CellLinkAlias, len(cells))
+		for i := range cells {
+			alias[i] = CellLinkAlias(cells[i])
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(alias)
 	})
 }

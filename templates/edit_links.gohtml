@@ -9,13 +9,22 @@
 		<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 		<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 		<script>
-			  $( function() {
-				$( "#source" ).autocomplete({
-					  source: "/sources"
-					});
-	
-			  } );
-			  </script>
+			 $( function() {
+				 $( "#newLink" ).autocomplete({
+					   source: "/searchCells",
+					   focus: function( event, ui ) {
+						   $( "#newlink" ).val( ui.item.label );
+						   return false;
+						   },
+					   select: function( event, ui ) {
+						   $( "#newlink" ).val( ui.item.label );
+						   $( "#cellToLink" ).val( ui.item.value );
+						   return false;
+						 }
+					 });
+	 
+			   } );
+		</script>
 	</head>
 	
 	<body>
@@ -40,8 +49,8 @@
 			
 			<form action="/cell/{{.Id}}/linkCell" method="POST">
 				<label for="title">New link:</label><br>
-				<input type="text" id="cellToLink" name="cellToLink"><br>
-
+				<input type="text" id="newLink" name="newLink"><br>
+				<input type="hidden" id="cellToLink" name="cellToLink"><br>
 				<input type="submit" value="Submit">
 			</form>
 		</main>
