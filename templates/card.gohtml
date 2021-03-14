@@ -25,11 +25,13 @@
 					{{range .Sources}}
 					<li class="card-source">{{.Source}}</li>
 					{{end}}
+					<a href="/cell/{{.Id}}/sources">Edit</a>
 				</ul>
 				<ul class="card-link-list">Links
 					{{range .Links}}
 					<li class="card-link"><a href="/cell/{{.Id}}">{{.Text}}</a></li>
 					{{end}}
+					<a href="/cell/{{.Id}}/links">Edit</a>
 				</ul> <!--links-->
 			</article>
 		</main>

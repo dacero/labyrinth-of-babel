@@ -170,6 +170,9 @@ func (r *lobRepository) UpdateCell(cell models.Cell) (int64, error) {
 
 func (r *lobRepository) LinkCells(idA string, idB string) (error) {
 	//verify that the cells are not already linked
+	if idA == idB {
+		return errors.New("Tried linking a cell with itself")
+	}
 	linked, err := r.CheckLink(idA, idB)
 	if err != nil {
 		return err
