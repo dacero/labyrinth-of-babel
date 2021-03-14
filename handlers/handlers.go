@@ -274,6 +274,9 @@ func SearchCellsHandler(lob repository.LobRepository) func(w http.ResponseWriter
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(alias)
+		err := json.NewEncoder(w).Encode(alias)
+		if err != nil {
+			log.Printf("Error when returning search result: %s", err)
+		}
 	})
 }
