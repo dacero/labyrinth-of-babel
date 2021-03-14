@@ -8,6 +8,9 @@ import (
 	"encoding/json"
 	"strings"
 	"errors"
+	"log"
+	"database/sql"
+	"io/ioutil"
 	
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -18,7 +21,34 @@ import (
 	"github.com/dacero/labyrinth-of-babel/models"
 )
 
+func resetDB() {
+	log.Print("Initializing db... ")
+	db, err := sql.Open("mysql", "root:secret@tcp(mysql:3306)/")
+	if err != nil {
+		log.Fatal("Error when opening DB: ", err)
+	}
+	defer db.Close()
+
+	file, err := ioutil.ReadFile("./db/labyrinth_of_babel.sql")
+	if err != nil {
+		// handle error
+		log.Fatal("Error when initializing DB: ", err)
+	}
+
+	for _, request := range strings.Split(string(file), ";") {
+		request = strings.TrimSpace(request)
+		if request != "" {
+			_, err := db.Exec(request)
+			if err != nil {
+				log.Fatalf("Error when initializing DB\n Query %s returned error: %s", request, err)
+			}
+		}
+	}
+	log.Print("Finished initiatlizing db!")
+}
+
 func TestRepository(t *testing.T) {
+	resetDB()
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Handlers Suite")
 }
@@ -40,13 +70,15 @@ var _ = Describe("Handler", func() {
 		router = mux.NewRouter()
 		router.HandleFunc("/cell/{id}", handlers.ViewHandler(lobRepository))
 		router.HandleFunc("/cell/{id}/edit", handlers.EditHandler(lobRepository))
-		router.HandleFunc("/cell/{id}/edit/sources", handlers.EditSourcesHandler(lobRepository))
+		router.HandleFunc("/cell/{id}/edit/sources", handlers.SourcesHandler(lobRepository))
 		router.HandleFunc("/cell/{id}/addSource", handlers.AddSourceHandler(lobRepository)).Methods("POST") //addSource
 		router.HandleFunc("/cell/{id}/removeSource", handlers.RemoveSourceHandler(lobRepository)).Methods("POST") //removeSource
+		router.HandleFunc("/cell/{id}/linkCell", handlers.LinkCellsHandler(lobRepository)).Methods("POST")
+		router.HandleFunc("/cell/{id}/unlinkCell", handlers.UnlinkCellsHandler(lobRepository)).Methods("POST")
 		router.HandleFunc("/save", handlers.SaveHandler(lobRepository))
 		router.HandleFunc("/new", handlers.CreateHandler(lobRepository))
-		router.HandleFunc("/sources", handlers.SourcesHandler(lobRepository))
-		router.HandleFunc("/rooms", handlers.RoomsHandler(lobRepository))
+		router.HandleFunc("/sources", handlers.SearchSourcesHandler(lobRepository))
+		router.HandleFunc("/rooms", handlers.SearchRoomsHandler(lobRepository))
 		router.HandleFunc("/page/{page}", handlers.PageHandler())
 	})
 
@@ -170,7 +202,7 @@ var _ = Describe("Handler", func() {
 	Describe("Searching for rooms", func() {
 		Context("with proper terms", func() {
 			BeforeEach(func() {
-				req, err := http.NewRequest("GET", "http://localhost:8080/rooms?term=Habita", nil)
+				req, err := http.NewRequest("GET", "http://localhost:8080/rooms?term=room", nil)
 				Expect(err).To(BeNil())
 				router.ServeHTTP(rr, req)
 				body = rr.Body.String()
@@ -273,6 +305,38 @@ var _ = Describe("Handler", func() {
 				router.ServeHTTP(rr, req)
 			})
 			It("should also return Status Found", func() {
+				Expect(rr.Code).To(Equal(http.StatusFound))
+			})
+		})
+	})
+	
+	Describe("When linking a cell", func() {
+		Context("given I provide a proper cell", func() {
+			BeforeEach(func() {
+				form := url.Values{}
+				form.Add("cellToLink", "df38bd04-0ec4-41bf-9e53-d0eeb95a4939")
+				req, err := http.NewRequest("POST", "http://localhost:8080/cell/"+"417ecfe7-d2b4-4e43-afd4-dbf5f431d97d"+"/linkCell", strings.NewReader(form.Encode()))
+				Expect(err).To(BeNil())
+				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+				router.ServeHTTP(rr, req)
+			})
+			It("should return Status Found", func() {
+				Expect(rr.Code).To(Equal(http.StatusFound))
+			})
+		})
+	})
+	
+	Describe("When unlinking two cells", func() {
+		Context("given I provide a proper cell", func() {
+			BeforeEach(func() {
+				form := url.Values{}
+				form.Add("cellToUnlink", "417ecfe7-d2b4-4e43-afd4-dbf5f431d97d")
+				req, err := http.NewRequest("POST", "http://localhost:8080/cell/"+cellId+"/unlinkCell", strings.NewReader(form.Encode()))
+				Expect(err).To(BeNil())
+				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+				router.ServeHTTP(rr, req)
+			})
+			It("should return Status Found", func() {
 				Expect(rr.Code).To(Equal(http.StatusFound))
 			})
 		})

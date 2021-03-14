@@ -21,12 +21,19 @@ type LobRepository interface {
 	//adds and removes a source from a cell, returns the cell with updated sources
 	AddSourceToCell(cellId string, source models.Source) (models.Cell, error)
 	RemoveSourceFromCell(cellId string, source models.Source) (models.Cell, error)
+	//links or unlink 2 cells
+	LinkCells(idA string, idB string) (error)
+	UnlinkCells(idA string, idB string) (error)
+	//checks if two cells are linked
+	CheckLink(idA string, idB string) (bool, error)
 	//creates a new cell and returns its new id
 	NewCell(c models.Cell) (string, error)
 	//searches for sources that contain the terms passed
 	SearchSources(term string) []models.Source
 	//searches for rooms that contain the terms passed
 	SearchRooms(term string) []string
+	//searches for cells that contain the terms passed
+	SearchCells(term string) []models.CellLink
 	//closes the database
 	Close()
 }
@@ -113,28 +120,31 @@ func (r *lobRepository) getCellLinks(id string) []models.CellLink {
 	defer rows.Close()
 
 	for rows.Next() {
-		var id, title, body, text string
+		var id, title, body string
 		var update_time time.Time
 		err := rows.Scan(&id, &title, &body, &update_time)
 		if err != nil {
 			log.Fatal(err)
 		}
-		if title == "" {
-			r := []rune(body)
-			if len(r) > 60 {
-				text = string(r[0:50]) + "..."
-			} else {
-				text = body
-			}
-		} else {
-			text = title
-		}
-		links = append(links, models.CellLink{Id: id, Text: text})
+		links = append(links, models.CellLink{Id: id, Text: shrinkCellText(title, body)})
 	}
 	if err := rows.Err(); err != nil {
 		log.Fatal(err)
 	}
 	return links
+}
+
+func shrinkCellText(title string, body string) (string) {
+	if title != "" {
+		return title
+	} else {
+		r := []rune(body)
+		if len(r) < 60 {
+			return body
+		} else {
+			return string(r[0:50]) + "..."
+		}
+	}
 }
 
 func (r *lobRepository) UpdateCell(cell models.Cell) (int64, error) {
@@ -156,6 +166,50 @@ func (r *lobRepository) UpdateCell(cell models.Cell) (int64, error) {
 		return 0, err
 	}
 	return result.RowsAffected()
+}
+
+func (r *lobRepository) LinkCells(idA string, idB string) (error) {
+	//verify that the cells are not already linked
+	if idA == idB {
+		return errors.New("Tried linking a cell with itself")
+	}
+	linked, err := r.CheckLink(idA, idB)
+	if err != nil {
+		return err
+	}
+	if linked {
+		return errors.New("Tried linking cells already linked")
+	}
+	//link the cells
+	stmt, err := r.getDB().Prepare("INSERT INTO cells_links(cells_a, cells_b) VALUES (?, ?)")
+	if err != nil {
+		return err
+	}
+	_, err = stmt.Exec(idA, idB)
+	return err
+}
+
+func (r *lobRepository) UnlinkCells(idA string, idB string) (error) {
+	//link the cells
+	stmt, err := r.getDB().Prepare("DELETE FROM cells_links WHERE (cells_a = ? AND cells_b = ?) OR (cells_a = ? AND cells_b = ?)")
+	if err != nil {
+		return err
+	}
+	_, err = stmt.Exec(idA, idB, idB, idA)
+	return err
+}
+
+func (r *lobRepository) CheckLink(idA string, idB string) (bool, error) {
+	var numLinks int
+	row := r.getDB().QueryRow("SELECT COUNT(*) FROM cells_links WHERE (cells_a=? AND cells_b=?) OR (cells_a=? AND cells_b=?)", idA, idB, idB, idA)
+	err := row.Scan(&numLinks)
+	if err != nil {
+		log.Print(err)
+		return false, err
+	}
+	if numLinks == 0 { return false, nil }
+	if numLinks == 1 { return true, nil }
+	return true, errors.New("Too many links")
 }
 
 func (r *lobRepository) AddSourceToCell(cellId string, source models.Source) (models.Cell, error) {
@@ -329,4 +383,31 @@ func (r *lobRepository) SearchRooms(term string) []string {
 		log.Fatal(err)
 	}
 	return rooms
+}
+
+func (r *lobRepository) SearchCells(term string) []models.CellLink {
+	var cells []models.CellLink
+	rows, err := r.getDB().Query(`SELECT id, title, body 
+		FROM cells
+		WHERE title LIKE ? OR body LIKE ?`, "%" + term + "%", "%" + term + "%")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var cell models.CellLink
+		var title, body string
+		err := rows.Scan(&cell.Id, &title, &body)
+		if err != nil {
+			log.Fatal(err)
+		}
+		//transform the title and body into a unified text
+		cell.Text = shrinkCellText(title, body)
+		cells = append(cells, cell)
+	}
+	if err := rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+	return cells
 }

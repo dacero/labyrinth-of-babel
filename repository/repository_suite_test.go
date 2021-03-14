@@ -14,7 +14,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func init() {
+func resetDB() {
 	log.Print("Initializing db... ")
 	db, err := sql.Open("mysql", "root:secret@tcp(mysql:3306)/")
 	if err != nil {
@@ -41,6 +41,7 @@ func init() {
 }
 
 func TestRepository(t *testing.T) {
+	resetDB()
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Repository Suite")
 }
@@ -87,6 +88,24 @@ var _ = Describe("Repository", func() {
 			})
 			It("should error", func() {
 				Expect(err).To(HaveOccurred())
+			})
+		})
+	})
+	
+	Describe("When I search for cells", func() {
+		Context("given I provide a term only used in one", func() {
+			It("should return only one cell", func() {
+				term := "shorter"
+				cells := lobRepo.SearchCells(term)
+				Expect(len(cells)).To(Equal(1))
+			})
+		})
+		Context("given I provide a term only used in all", func() {
+			It("should return three cells", func() {
+				term := "idea"
+				cells := lobRepo.SearchCells(term)
+				Expect(len(cells)).To(Equal(3))
+				log.Print(cells)
 			})
 		})
 	})
@@ -295,5 +314,54 @@ var _ = Describe("Repository", func() {
 			})
 		})
 	})
-
+	
+	Describe("When I link 2 cells", func() {
+		var cellA string
+		var cellB string
+		Context("given they exist and are not linked", func() {
+			BeforeEach(func() {
+				cellA = "417ecfe7-d2b4-4e43-afd4-dbf5f431d97d"
+				cellB = "df38bd04-0ec4-41bf-9e53-d0eeb95a4939"
+				err = lobRepo.LinkCells(cellA, cellB)
+			})
+			It("should return no error", func() {
+				Expect(err).To(BeNil())
+			})
+			It("should link the 2 cells", func() {
+				areLinked, err := lobRepo.CheckLink(cellA, cellB)
+				Expect(err).To(BeNil())
+				Expect(areLinked).To(Equal(true))
+			})
+		})
+		Context("given they are already linked", func() {
+			BeforeEach(func() {
+				cellA = "417ecfe7-d2b4-4e43-afd4-dbf5f431d97d"
+				cellB = "72aed05b-cb2d-4cad-bf70-05d8ae02a7bc"
+				err = lobRepo.LinkCells(cellA, cellB)
+			})
+			It("should return error", func() {
+				Expect(err).ToNot(BeNil())
+			})
+		})
+	})
+	
+	Describe("When I unlink 2 cells", func() {
+		var cellA string
+		var cellB string
+		Context("given they exist and are linked", func() {
+			BeforeEach(func() {
+				cellA = "417ecfe7-d2b4-4e43-afd4-dbf5f431d97d"
+				cellB = "72aed05b-cb2d-4cad-bf70-05d8ae02a7bc"
+				err = lobRepo.UnlinkCells(cellA, cellB)
+			})
+			It("should return no error", func() {
+				Expect(err).To(BeNil())
+			})
+			It("should link the 2 cells", func() {
+				areLinked, err := lobRepo.CheckLink(cellA, cellB)
+				Expect(err).To(BeNil())
+				Expect(areLinked).To(Equal(false))
+			})
+		})
+	})
 })
