@@ -41,7 +41,8 @@ type LobRepository interface {
 
 func NewLobRepository() *lobRepository {
 	password := os.Getenv("MYSQL_ROOT_PASSWORD")
-	newDB, err := sql.Open("mysql", "root:"+password+"@tcp(mysql:3306)/labyrinth_of_babel?parseTime=true")
+	database := os.Getenv("MYSQL_DATABASE")
+	newDB, err := sql.Open("mysql", "root:"+password+"@tcp(mysql:3306)/"+database+"?parseTime=true")
 	if err != nil {
 		log.Panic(err)
 	}

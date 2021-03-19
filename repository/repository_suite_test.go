@@ -24,7 +24,7 @@ func resetDB() {
 	}
 	defer db.Close()
 
-	file, err := ioutil.ReadFile("./db/labyrinth_of_babel.sql")
+	file, err := ioutil.ReadFile("./db/test.sql")
 	if err != nil {
 		// handle error
 		log.Fatal("Error when initializing DB: ", err)

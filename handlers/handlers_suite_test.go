@@ -23,7 +23,7 @@ import (
 )
 
 func resetDB() {
-	log.Print("Initializing db... ")
+	log.Print("Resetting db... ")
 	password := os.Getenv("MYSQL_ROOT_PASSWORD")
 	db, err := sql.Open("mysql", "root:"+password+"@tcp(mysql:3306)/")
 	if err != nil {
@@ -31,7 +31,7 @@ func resetDB() {
 	}
 	defer db.Close()
 
-	file, err := ioutil.ReadFile("./db/labyrinth_of_babel.sql")
+	file, err := ioutil.ReadFile("./db/test.sql")
 	if err != nil {
 		// handle error
 		log.Fatal("Error when initializing DB: ", err)
