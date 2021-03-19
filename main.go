@@ -16,7 +16,7 @@ import (
 )
 
 // initialises the database
-func init() {
+func reset() {
 	log.Print("Initializing db... ")
 	password := os.Getenv("MYSQL_ROOT_PASSWORD")
 	db, err := sql.Open("mysql", "root:"+password+"@tcp(mysql:3306)/")

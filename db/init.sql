@@ -1,5 +1,3 @@
-DROP DATABASE IF EXISTS `labyrinth_of_babel`;
-
 CREATE DATABASE `labyrinth_of_babel`;
 
 USE `labyrinth_of_babel`;
@@ -47,12 +45,6 @@ CREATE TABLE `cells_links` (
   CONSTRAINT `fk_cells_has_cells_cells2` FOREIGN KEY (`cells_b`) REFERENCES `cells` (`id`)
 );
   
-INSERT INTO `rooms` VALUES ('This is a room');
+INSERT INTO `rooms` VALUES ('Labyrinth Wall');
 
-INSERT INTO `sources` VALUES ('Analects'),('Confucius');
-
-INSERT INTO `cells` VALUES ('417ecfe7-d2b4-4e43-afd4-dbf5f431d97d','Idea two','The second idea has a shorter body, but it\'s good enough.','2021-02-20 07:54:18','2021-02-20 07:54:18','This is a room'),('72aed05b-cb2d-4cad-bf70-05d8ae02a7bc','Idea one','Body of the first idea. Lengthy, useless, but interesting','2021-02-20 07:53:08','2021-02-20 07:53:08','This is a room'),('df38bd04-0ec4-41bf-9e53-d0eeb95a4939','','The third idea has no title, so that we can test what happens here','2021-02-20 07:55:36','2021-02-20 07:55:36','This is a room');
-
-INSERT INTO `cells_sources` VALUES ('417ecfe7-d2b4-4e43-afd4-dbf5f431d97d','Confucius'),('72aed05b-cb2d-4cad-bf70-05d8ae02a7bc','Analects'),('72aed05b-cb2d-4cad-bf70-05d8ae02a7bc','Confucius'),('df38bd04-0ec4-41bf-9e53-d0eeb95a4939','Confucius');
-
-INSERT INTO `cells_links` VALUES ('72aed05b-cb2d-4cad-bf70-05d8ae02a7bc','417ecfe7-d2b4-4e43-afd4-dbf5f431d97d'),('df38bd04-0ec4-41bf-9e53-d0eeb95a4939','72aed05b-cb2d-4cad-bf70-05d8ae02a7bc');
+INSERT INTO `cells` VALUES ('entry','Labyrinth Entry','Enter the labyrinth','2021-02-20 07:54:18','2021-02-20 07:54:18','Labyrinth Wall');
