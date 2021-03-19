@@ -3,6 +3,7 @@ package repository_test
 import (
 	"testing"
 	"log"
+	"os"
 	"database/sql"
 	"strings"
 	"io/ioutil"
@@ -16,7 +17,8 @@ import (
 
 func resetDB() {
 	log.Print("Initializing db... ")
-	db, err := sql.Open("mysql", "root:secret@tcp(mysql:3306)/")
+	password := os.Getenv("MYSQL_ROOT_PASSWORD")
+	db, err := sql.Open("mysql", "root:"+password+"@tcp(mysql:3306)/")
 	if err != nil {
 		log.Fatal("Error when opening DB: ", err)
 	}

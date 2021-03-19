@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"log"
+	"os"
 	"time"
 	"errors"
 	"strings"
@@ -39,7 +40,8 @@ type LobRepository interface {
 }
 
 func NewLobRepository() *lobRepository {
-	newDB, err := sql.Open("mysql", "root:secret@tcp(mysql:3306)/labyrinth_of_babel?parseTime=true")
+	password := os.Getenv("MYSQL_ROOT_PASSWORD")
+	newDB, err := sql.Open("mysql", "root:"+password+"@tcp(mysql:3306)/labyrinth_of_babel?parseTime=true")
 	if err != nil {
 		log.Panic(err)
 	}
