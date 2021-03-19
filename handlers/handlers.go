@@ -200,8 +200,7 @@ func CreateHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *
 		log.Printf("New cell title: %s", r.PostFormValue("title"))
 		newCell := models.Cell{Title: r.PostFormValue("title"),
 			Body: r.PostFormValue("body"),
-			Room: r.PostFormValue("room"),
-			Sources: []models.Source{ models.Source{Source:r.PostFormValue("source")} } }
+			Room: r.PostFormValue("room")}
 		//call repository to create it
 		newCellId, err := lob.NewCell(newCell)
 		if err != nil {

@@ -287,9 +287,12 @@ func (r *lobRepository) insertSources(sources []models.Source) error {
 	insertStr := "INSERT IGNORE INTO sources(source) VALUES "
 	vals := []interface{}{}
 	for _, source := range sources {
-		insertStr += "(?),"
-		vals = append(vals, strings.TrimSpace(string(source.String())))
+		if trimmedSource := strings.TrimSpace(string(source.String())); trimmedSource != "" {
+			insertStr += "(?),"
+			vals = append(vals, trimmedSource)
+		}
 	}
+	if len(vals) == 0 { return nil }
 	//trim the last
 	insertStr = insertStr[:len(insertStr)-1]
 	stmt, err := r.getDB().Prepare(insertStr)
@@ -322,9 +325,12 @@ func (r *lobRepository) linkSources(cellId string, sources []models.Source) erro
 	insertStr := "INSERT IGNORE INTO cells_sources(cells_id, sources_source) VALUES "
 	vals := []interface{}{}
 	for _, source := range sources {
-		insertStr += "(?, ?),"
-		vals = append(vals, cellId, string(source.String()))
+		if trimmedSource := strings.TrimSpace(string(source.String())); trimmedSource != "" {
+			insertStr += "(?, ?),"
+			vals = append(vals, cellId, trimmedSource)
+		}
 	}
+	if len(vals) == 0 { return nil }
 	//trim the last
 	insertStr = insertStr[:len(insertStr)-1]
 	stmt, err := r.getDB().Prepare(insertStr)
