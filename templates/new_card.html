@@ -11,10 +11,10 @@
 		<script>
 			  $( function() {
 				$( "#source" ).autocomplete({
-				  source: "/sources"
+				  source: "/searchSources"
 				});
 				$( "#room" ).autocomplete({
-					  source: "/rooms"
+					  source: "/searchRooms"
 					});
 	
 			  } );
@@ -30,13 +30,13 @@
 			<!--here's where the card actually goes-->
 			<form action="/new" method="POST">
 				<label for="title">Room:</label><br>
-				<input type="text" id="room" name="room" value="This is a room"><br>
+				<input type="text" id="room" name="room"><br>
 				<label for="title">Title:</label><br>
 				<input type="text" id="title" name="title" size="80"><br>
 				<label for="lname">Body:</label><br>
 				<textarea id="body" name="body" rows="10" cols="80"></textarea><br>
 				<label for="title">Sources:</label><br>
-				<input type="text" id="source" name="source" size="80" value="Confucius"><br><br>
+				<input type="text" id="source" name="source" size="80"><br><br>
 
 				<input type="submit" value="Submit">
 			</form>
