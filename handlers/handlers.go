@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"strings"
 	"net/http"
 	"text/template"
 	"encoding/json"
@@ -11,6 +12,8 @@ import (
 	"github.com/dacero/labyrinth-of-babel/repository"
 	"github.com/dacero/labyrinth-of-babel/models"
 	"github.com/gorilla/mux"
+	"github.com/russross/blackfriday/v2"
+	"github.com/microcosm-cc/bluemonday"
 )
 
 func ViewHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
@@ -26,6 +29,7 @@ func ViewHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *ht
 			w.WriteHeader(http.StatusNotFound)
 			fmt.Fprint(w, string(notFound))
 		} else {
+			cell.Body = markdown2HTML(cell.Body)
 			t, err := template.ParseFiles("./templates/card.gohtml")
 			if err != nil {
 				log.Printf("Error when returning card: %s", err)
@@ -36,6 +40,13 @@ func ViewHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *ht
 			}
 		}
 	})
+}
+
+func markdown2HTML(markdownStr string) string {
+	groomedString := strings.ReplaceAll(markdownStr, "\r\n", "\n")
+	unsafe := blackfriday.Run([]byte(groomedString))
+	output := bluemonday.UGCPolicy().SanitizeBytes(unsafe)
+	return string(output)
 }
 
 func EditHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
