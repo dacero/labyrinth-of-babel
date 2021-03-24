@@ -29,6 +29,8 @@ type LobRepository interface {
 	CheckLink(idA string, idB string) (bool, error)
 	//creates a new cell and returns its new id
 	NewCell(c models.Cell) (string, error)
+	//Returns a full list of all rooms in the labyrinth
+	ListRooms() ([]models.CollectionOfCells, error)
 	//searches for sources that contain the terms passed
 	SearchSources(term string) []models.Source
 	//searches for rooms that contain the terms passed
@@ -107,16 +109,16 @@ func (r *lobRepository) getCellSources(id string) []models.Source {
 func (r *lobRepository) getCellLinks(id string) []models.CellLink {
 	var links []models.CellLink
 
-	rows, err := r.getDB().Query(`SELECT c.id, c.title, c.body, c.update_time 
+	rows, err := r.getDB().Query(`SELECT c.id, c.title, c.body, c.create_time 
 		FROM cells_links l, cells c 
 		WHERE l.cells_a = c.id
 		AND l.cells_b = ?
 		UNION
-		SELECT c.id, c.title, c.body, c.update_time 
+		SELECT c.id, c.title, c.body, c.create_time 
 		FROM cells_links l, cells c 
 		WHERE l.cells_b = c.id
 		AND l.cells_a = ?
-		ORDER BY update_time DESC;`, id, id)
+		ORDER BY create_time DESC;`, id, id)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -342,6 +344,33 @@ func (r *lobRepository) linkSources(cellId string, sources []models.Source) erro
 		return err
 	}
 	return nil	
+}
+
+func (r *lobRepository) ListRooms() ([]models.CollectionOfCells, error) {
+	var rooms []models.CollectionOfCells
+	
+	rows, err := r.getDB().Query(`SELECT rooms.room, COUNT(*), MIN(create_time) create_time 
+		FROM rooms, cells
+		WHERE rooms.room = cells.room
+		GROUP BY rooms.room
+		ORDER BY create_time DESC`)
+	if err != nil {
+		return rooms, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var room models.CollectionOfCells
+		err := rows.Scan(&room.Name, &room.CellCount, &room.Create_time)
+		if err != nil {
+			return rooms, err
+		}
+		rooms = append(rooms, room)
+	}
+	if err := rows.Err(); err != nil {
+		return rooms, err
+	}
+	return rooms, nil
 }
 
 func (r *lobRepository) SearchSources(term string) []models.Source {

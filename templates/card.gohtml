@@ -15,25 +15,31 @@
 		<main>
 			<!--here's where the card actually goes-->
 			<article class="card">
-				<div class="card-room">{{.Room}}</div>
-				<div class="card-title">{{.Title}}</div><!--title-->
-				<div class="card-date">{{.Create_time.Format "02 Jan 2006"}}</div>
+				<div class="card-header">
+					<div class="card-room">{{.Room}}</div>
+					<div class="card-title">{{.Title}}</div><!--title-->
+					<div class="card-date">{{.Create_time.Format "02 Jan 2006"}}</div>
+				</div>
 				<div class="card-body">
 					{{.Body}}
 				</div>
-				<ul class="card-source-list">Source
-					{{range .Sources}}
-					<li class="card-source">{{.Source}}</li>
-					{{end}}
-					<a href="/cell/{{.Id}}/sources">Edit</a>
-				</ul>
-				<ul class="card-link-list">Links
+				<div class="card-sources">
+					<ul class="card-source-list">Sources
+						{{range .Sources}}
+						<li class="card-source">{{.Source}}</li>
+						{{end}}
+					</ul>
+				</div>
+			</article>
+			
+			<footer class="card-links">
+				<h1>Labyrinth Links</h1>
+				<ul class="card-link-list">
 					{{range .Links}}
 					<li class="card-link"><a href="/cell/{{.Id}}">{{.Text}}</a></li>
 					{{end}}
-					<a href="/cell/{{.Id}}/links">Edit</a>
 				</ul> <!--links-->
-			</article>
+			</footer>
 		</main>
 
 		<footer>

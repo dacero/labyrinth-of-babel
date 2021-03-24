@@ -290,3 +290,31 @@ func SearchCellsHandler(lob repository.LobRepository) func(w http.ResponseWriter
 		}
 	})
 }
+
+func RoomListHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		rooms, err := lob.ListRooms()
+		if err != nil {
+			log.Printf("Error when obtaining the list of rooms: %s", err)
+			notFound, err := ioutil.ReadFile("./templates/card_not_found.html")
+			if err != nil {
+				log.Printf("Error when obtaining the list of rooms: %s", err)
+			}
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprint(w, string(notFound))
+		} else {
+			t, err := template.ParseFiles("./templates/rooms.gohtml")
+			if err != nil {
+				log.Printf("Error when parsing the rooms template: %s", err)
+			}
+			type data struct {
+				Rooms []models.CollectionOfCells
+			}
+			roomsData := data{Rooms: rooms}
+			err = t.Execute(w, roomsData)
+			if err != nil {
+				log.Printf("Error when returning card: %s", err)
+			}
+		}
+	})
+}
