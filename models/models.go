@@ -29,4 +29,5 @@ type CellLink struct {
 type CollectionOfCells struct {
 	Name		string
 	CellCount	int
+	Create_time time.Time
 }

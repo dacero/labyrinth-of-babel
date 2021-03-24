@@ -349,10 +349,11 @@ func (r *lobRepository) linkSources(cellId string, sources []models.Source) erro
 func (r *lobRepository) ListRooms() ([]models.CollectionOfCells, error) {
 	var rooms []models.CollectionOfCells
 	
-	rows, err := r.getDB().Query(`SELECT rooms.room, COUNT(*) 
+	rows, err := r.getDB().Query(`SELECT rooms.room, COUNT(*), MIN(create_time) create_time 
 		FROM rooms, cells
 		WHERE rooms.room = cells.room
-		GROUP BY rooms.room`)
+		GROUP BY rooms.room
+		ORDER BY create_time DESC`)
 	if err != nil {
 		return rooms, err
 	}
@@ -360,7 +361,7 @@ func (r *lobRepository) ListRooms() ([]models.CollectionOfCells, error) {
 
 	for rows.Next() {
 		var room models.CollectionOfCells
-		err := rows.Scan(&room.Name, &room.CellCount)
+		err := rows.Scan(&room.Name, &room.CellCount, &room.Create_time)
 		if err != nil {
 			return rooms, err
 		}
