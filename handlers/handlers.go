@@ -308,7 +308,7 @@ func RoomListHandler(lob repository.LobRepository) func(w http.ResponseWriter, r
 				log.Printf("Error when parsing the rooms template: %s", err)
 			}
 			type data struct {
-				Rooms []string
+				Rooms []models.CollectionOfCells
 			}
 			roomsData := data{Rooms: rooms}
 			err = t.Execute(w, roomsData)

@@ -30,7 +30,7 @@ type LobRepository interface {
 	//creates a new cell and returns its new id
 	NewCell(c models.Cell) (string, error)
 	//Returns a full list of all rooms in the labyrinth
-	ListRooms() ([]string, error)
+	ListRooms() ([]models.CollectionOfCells, error)
 	//searches for sources that contain the terms passed
 	SearchSources(term string) []models.Source
 	//searches for rooms that contain the terms passed
@@ -346,19 +346,21 @@ func (r *lobRepository) linkSources(cellId string, sources []models.Source) erro
 	return nil	
 }
 
-func (r *lobRepository) ListRooms() ([]string, error) {
-	var rooms []string
+func (r *lobRepository) ListRooms() ([]models.CollectionOfCells, error) {
+	var rooms []models.CollectionOfCells
 	
-	rows, err := r.getDB().Query(`SELECT room 
-		FROM rooms`)
+	rows, err := r.getDB().Query(`SELECT rooms.room, COUNT(*) 
+		FROM rooms, cells
+		WHERE rooms.room = cells.room
+		GROUP BY rooms.room`)
 	if err != nil {
 		return rooms, err
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		var room string
-		err := rows.Scan(&room)
+		var room models.CollectionOfCells
+		err := rows.Scan(&room.Name, &room.CellCount)
 		if err != nil {
 			return rooms, err
 		}

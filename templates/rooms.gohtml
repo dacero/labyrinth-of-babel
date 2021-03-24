@@ -18,7 +18,7 @@
 				<h1>Labyrinth Rooms</h1>
 				<ul class="rooms-list">
 					{{range $room := .Rooms}}
-					<li class="room">{{$room}}</li>
+					<li class="room">{{$room.Name}} - num of cells: {{$room.CellCount}}</li>
 					{{end}}
 				</ul> 
 			</article>

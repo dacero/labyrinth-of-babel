@@ -25,3 +25,8 @@ type CellLink struct {
 	Id   string
 	Text string
 }
+
+type CollectionOfCells struct {
+	Name		string
+	CellCount	int
+}
