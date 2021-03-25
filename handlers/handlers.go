@@ -318,3 +318,33 @@ func RoomListHandler(lob repository.LobRepository) func(w http.ResponseWriter, r
 		}
 	})
 }
+
+func RoomHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		room := mux.Vars(r)["room"]
+		cells, err := lob.ListCellsInRoom(room)
+		if err != nil {
+			log.Printf("Error when entering room: %s", err)
+			notFound, err := ioutil.ReadFile("./templates/card_not_found.html")
+			if err != nil {
+				log.Printf("Error when entering room: %s", err)
+			}
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprint(w, string(notFound))
+		} else {
+			t, err := template.ParseFiles("./templates/cells_collection.gohtml")
+			if err != nil {
+				log.Printf("Error when parsing the room template: %s", err)
+			}
+			type data struct {
+				Name	string
+				Cells 	[]models.Cell
+			}
+			roomCells := data{Name: room, Cells: cells}
+			err = t.Execute(w, roomCells)
+			if err != nil {
+				log.Printf("Error when returning card: %s", err)
+			}
+		}
+	})
+}
