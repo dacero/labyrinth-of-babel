@@ -18,7 +18,7 @@
 				<h1>Labyrinth Rooms</h1>
 				<ul class="rooms-list">
 					{{range $room := .Rooms}}
-					<li class="room"><a href="/"><span class="room-name">{{$room.Name}}</span> <span class="room-num-of-cells">{{$room.CellCount}}</span></a></li>
+					<li class="room"><a href="/room/{{$room.Name}}"><span class="room-name">{{$room.Name}}</span> <span class="room-num-of-cells">{{$room.CellCount}}</span></a></li>
 					{{end}}
 				</ul> 
 			</article>

@@ -31,6 +31,8 @@ type LobRepository interface {
 	NewCell(c models.Cell) (string, error)
 	//Returns a full list of all rooms in the labyrinth
 	ListRooms() ([]models.CollectionOfCells, error)
+	//Returns all cells in a room
+	ListCellsInRoom(room string) ([]models.Cell, error)
 	//searches for sources that contain the terms passed
 	SearchSources(term string) []models.Source
 	//searches for rooms that contain the terms passed
@@ -346,32 +348,6 @@ func (r *lobRepository) linkSources(cellId string, sources []models.Source) erro
 	return nil	
 }
 
-func (r *lobRepository) ListRooms() ([]models.CollectionOfCells, error) {
-	var rooms []models.CollectionOfCells
-	
-	rows, err := r.getDB().Query(`SELECT rooms.room, COUNT(*), MIN(create_time) create_time 
-		FROM rooms, cells
-		WHERE rooms.room = cells.room
-		GROUP BY rooms.room
-		ORDER BY create_time DESC`)
-	if err != nil {
-		return rooms, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var room models.CollectionOfCells
-		err := rows.Scan(&room.Name, &room.CellCount, &room.Create_time)
-		if err != nil {
-			return rooms, err
-		}
-		rooms = append(rooms, room)
-	}
-	if err := rows.Err(); err != nil {
-		return rooms, err
-	}
-	return rooms, nil
-}
 
 func (r *lobRepository) SearchSources(term string) []models.Source {
 	var sources []models.Source
@@ -449,3 +425,57 @@ func (r *lobRepository) SearchCells(term string) []models.CellLink {
 	}
 	return cells
 }
+
+func (r *lobRepository) ListRooms() ([]models.CollectionOfCells, error) {
+	var rooms []models.CollectionOfCells
+	
+	rows, err := r.getDB().Query(`SELECT rooms.room, COUNT(*), MIN(create_time) create_time 
+		FROM rooms, cells
+		WHERE rooms.room = cells.room
+		GROUP BY rooms.room
+		ORDER BY create_time DESC`)
+	if err != nil {
+		return rooms, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var room models.CollectionOfCells
+		err := rows.Scan(&room.Name, &room.CellCount, &room.Create_time)
+		if err != nil {
+			return rooms, err
+		}
+		rooms = append(rooms, room)
+	}
+	if err := rows.Err(); err != nil {
+		return rooms, err
+	}
+	return rooms, nil
+}
+
+func (r *lobRepository) ListCellsInRoom(room string) ([]models.Cell, error) {
+	var cells []models.Cell
+	
+	rows, err := r.getDB().Query(`SELECT id, title, body, room, create_time, update_time 
+		FROM cells 
+		WHERE room=?
+		ORDER BY update_time DESC`, room)
+	if err != nil {
+		return cells, err
+	}
+	defer rows.Close()
+	
+	for rows.Next() {
+		var cell models.Cell
+		err := rows.Scan(&cell.Id, &cell.Title, &cell.Body, &cell.Room, &cell.Create_time, &cell.Update_time)
+		if err != nil {
+			return cells, err
+		}
+		cells = append(cells, cell)
+	}
+	if err := rows.Err(); err != nil {
+		return cells, err
+	}
+	
+	return cells, nil
+}	

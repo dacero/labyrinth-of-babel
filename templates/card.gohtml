@@ -16,12 +16,12 @@
 			<!--here's where the card actually goes-->
 			<article class="card">
 				<div class="card-header">
-					<div class="card-room">{{.Room}}</div>
+					<div class="card-room"><a href="/room/{{.Room}}">{{.Room}}</a></div>
 					<div class="card-title">{{.Title}}</div><!--title-->
 					<div class="card-date">{{.Create_time.Format "02 Jan 2006"}}</div>
 				</div>
 				<div class="card-body">
-					{{.Body}}
+					{{.HTMLBody}}
 				</div>
 				<div class="card-sources">
 					<ul class="card-source-list">Sources

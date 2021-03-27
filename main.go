@@ -30,5 +30,6 @@ func main() {
 	r.HandleFunc("/searchCells", handlers.SearchCellsHandler(lobRepository))
 	r.HandleFunc("/page/{page}", handlers.PageHandler())
 	r.HandleFunc("/rooms", handlers.RoomListHandler(lobRepository))
+	r.HandleFunc("/room/{room}", handlers.RoomHandler(lobRepository))
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
