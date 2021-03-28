@@ -38,7 +38,7 @@ type LobRepository interface {
 	//searches for rooms that contain the terms passed
 	SearchRooms(term string) []string
 	//searches for cells that contain the terms passed
-	SearchCells(term string) []models.CellLink
+	SearchCells(term string) []models.Cell
 	//closes the database
 	Close()
 }
@@ -108,15 +108,15 @@ func (r *lobRepository) getCellSources(id string) []models.Source {
 	return sources
 }
 
-func (r *lobRepository) getCellLinks(id string) []models.CellLink {
-	var links []models.CellLink
+func (r *lobRepository) getCellLinks(id string) []models.Cell {
+	var links []models.Cell
 
-	rows, err := r.getDB().Query(`SELECT c.id, c.title, c.body, c.create_time 
+	rows, err := r.getDB().Query(`SELECT c.id, c.title, c.body, c.create_time, c.update_time, c.room 
 		FROM cells_links l, cells c 
 		WHERE l.cells_a = c.id
 		AND l.cells_b = ?
 		UNION
-		SELECT c.id, c.title, c.body, c.create_time 
+		SELECT c.id, c.title, c.body, c.create_time, c.update_time, c.room
 		FROM cells_links l, cells c 
 		WHERE l.cells_b = c.id
 		AND l.cells_a = ?
@@ -127,31 +127,17 @@ func (r *lobRepository) getCellLinks(id string) []models.CellLink {
 	defer rows.Close()
 
 	for rows.Next() {
-		var id, title, body string
-		var update_time time.Time
-		err := rows.Scan(&id, &title, &body, &update_time)
+		var cell models.Cell
+		err := rows.Scan(&cell.Id, &cell.Title, &cell.Body, &cell.Create_time, &cell.Update_time, &cell.Room)
 		if err != nil {
 			log.Fatal(err)
 		}
-		links = append(links, models.CellLink{Id: id, Text: shrinkCellText(title, body)})
+		links = append(links, cell)
 	}
 	if err := rows.Err(); err != nil {
 		log.Fatal(err)
 	}
 	return links
-}
-
-func shrinkCellText(title string, body string) (string) {
-	if title != "" {
-		return title
-	} else {
-		r := []rune(body)
-		if len(r) < 60 {
-			return body
-		} else {
-			return string(r[0:50]) + "..."
-		}
-	}
 }
 
 func (r *lobRepository) UpdateCell(cell models.Cell) (int64, error) {
@@ -399,9 +385,9 @@ func (r *lobRepository) SearchRooms(term string) []string {
 	return rooms
 }
 
-func (r *lobRepository) SearchCells(term string) []models.CellLink {
-	var cells []models.CellLink
-	rows, err := r.getDB().Query(`SELECT id, title, body 
+func (r *lobRepository) SearchCells(term string) []models.Cell {
+	var cells []models.Cell
+	rows, err := r.getDB().Query(`SELECT id, title, body, create_time, update_time, room
 		FROM cells
 		WHERE title LIKE ? OR body LIKE ?`, "%" + term + "%", "%" + term + "%")
 	if err != nil {
@@ -410,14 +396,11 @@ func (r *lobRepository) SearchCells(term string) []models.CellLink {
 	defer rows.Close()
 
 	for rows.Next() {
-		var cell models.CellLink
-		var title, body string
-		err := rows.Scan(&cell.Id, &title, &body)
+		var cell models.Cell
+		err := rows.Scan(&cell.Id, &cell.Title, &cell.Body, &cell.Create_time, &cell.Update_time, &cell.Room)
 		if err != nil {
 			log.Fatal(err)
 		}
-		//transform the title and body into a unified text
-		cell.Text = shrinkCellText(title, body)
 		cells = append(cells, cell)
 	}
 	if err := rows.Err(); err != nil {

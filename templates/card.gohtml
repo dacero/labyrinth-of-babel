@@ -5,6 +5,7 @@
 		<meta name="author" content="da0">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link rel="stylesheet" href="http://deliris.net/thoughts/labyrinth/style.css" type="text/css">
+		<link rel="stylesheet" href="http://deliris.net/thoughts/labyrinth/cell-collection.css" type="text/css">
 	</head>
 	
 	<body>
@@ -33,13 +34,20 @@
 			</article>
 			
 			<footer class="card-links">
-				<h1>Labyrinth Links</h1>
-				<ul class="card-link-list">
-					{{range .Links}}
-					<li class="card-link"><a href="/cell/{{.Id}}">{{.Text}}</a></li>
-					{{end}}
-				</ul> <!--links-->
+				<h2>Labyrinth</h2>
+				<h1>Links</h1>
+				<div class="card-collection">
+					{{range $cell := .Links}}
+					<a href="/cell/{{.Id}}" class="card-thumbnail">
+						{{if $cell.Title}}<div class="card-title">{{$cell.Title}}</div>{{end}}
+						<div class="card-body">
+							{{$cell.HTMLBody}}
+						</div>					
+					</a>
+					{{end}}				
+				</div>
 			</footer>
+			
 		</main>
 
 		<footer>

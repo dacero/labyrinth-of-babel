@@ -267,9 +267,10 @@ func SearchCellsHandler(lob repository.LobRepository) func(w http.ResponseWriter
 			Id   string `json:"value"`
 			Text string `json:"label"`
 		}
-		var alias = make([]CellLinkAlias, len(cells))
-		for i := range cells {
-			alias[i] = CellLinkAlias(cells[i])
+		var alias []CellLinkAlias
+		for _, cell := range cells {
+			cellAlias := CellLinkAlias{Id: cell.Id, Text: cell.Summary()}
+			alias = append(alias, cellAlias)
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -279,6 +280,7 @@ func SearchCellsHandler(lob repository.LobRepository) func(w http.ResponseWriter
 		}
 	})
 }
+
 
 func RoomListHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
