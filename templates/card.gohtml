@@ -38,12 +38,14 @@
 				<h1>Links</h1>
 				<div class="card-collection">
 					{{range $cell := .Links}}
-					<a href="/cell/{{.Id}}" class="card-thumbnail">
-						{{if $cell.Title}}<div class="card-title">{{$cell.Title}}</div>{{end}}
-						<div class="card-body">
-							{{$cell.HTMLBody}}
-						</div>					
-					</a>
+					<div class="card-thumbnail">
+						<a href="/cell/{{.Id}}">
+							{{if $cell.Title}}<div class="card-title">{{$cell.Title}}</div>{{end}}
+							<div class="card-body">
+								{{$cell.HTMLBody}}
+							</div>					
+						</a>
+					</div>
 					{{end}}				
 				</div>
 			</footer>
