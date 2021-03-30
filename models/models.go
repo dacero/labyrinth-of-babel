@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 	"strings"
+	"regexp"
 	
 	"github.com/russross/blackfriday/v2"
 	"github.com/microcosm-cc/bluemonday"
@@ -24,6 +25,12 @@ func (c Cell) HTMLBody() string {
 	unsafe := blackfriday.Run([]byte(groomedString))
 	output := bluemonday.UGCPolicy().SanitizeBytes(unsafe)
 	return string(output)
+}
+
+func (c Cell) HTMLNoLinksBody() string {
+	htmlBody := c.HTMLBody()
+	re := regexp.MustCompile(`</?a(|\s+[^>]+)>`)
+	return re.ReplaceAllString(htmlBody, "")
 }
 
 func (c Cell) Summary() string {

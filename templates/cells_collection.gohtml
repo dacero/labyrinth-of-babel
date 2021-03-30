@@ -16,14 +16,12 @@
 		
 		<main class="card-collection">
 			{{range $cell := .Cells}}
-			<div class="card-thumbnail">
-				<a href="/cell/{{.Id}}">
+				<a class="card-thumbnail" href="/cell/{{.Id}}">
 					{{if $cell.Title}}<div class="card-title">{{$cell.Title}}</div>{{end}}
 					<div class="card-body">
-						{{$cell.HTMLBody}}
+						{{$cell.HTMLNoLinksBody}}
 					</div>					
 				</a>
-			</div>
 			{{end}}
 		</main>
 	</body>
