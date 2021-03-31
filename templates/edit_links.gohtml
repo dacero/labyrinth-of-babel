@@ -37,7 +37,7 @@
 			<article class="card">
 				<ul class="card-link-list">Links
 					{{range .Links}}
-					<li class="card-link">{{.Text}}
+					<li class="card-link">{{.Title}}
 						<form action="/cell/{{$cell.Id}}/unlinkCell" method="POST">
 							<input type="hidden" id="cellToUnlink" name="cellToUnlink" value="{{.Id}}">
 							<input type="submit" value="Unlink">
