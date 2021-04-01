@@ -209,7 +209,7 @@ func CreateHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *
 			fmt.Fprintf(w, "Error when creating card: %s", err)
 		} 
 		//redirect to view the new cell card
-		http.Redirect(w, r, "/cell/"+newCellId, http.StatusFound)
+		http.Redirect(w, r, "/cell/"+newCellId+"/edit", http.StatusFound)
 	})
 }
 

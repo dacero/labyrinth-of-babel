@@ -34,8 +34,10 @@
 			</article>
 			
 			<footer class="card-links">
-				<h2>Labyrinth</h2>
-				<h1>Links</h1>
+				<div class="section-header">
+					<h2>Labyrinth</h2>
+					<h1>Links</h1>
+				</div>
 				<div class="card-collection">
 					{{range $cell := .Links}}
 						<a class="card-thumbnail" href="/cell/{{.Id}}">
