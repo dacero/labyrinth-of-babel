@@ -1,7 +1,7 @@
 FROM golang:1.15-alpine3.12 as base
 RUN apk add --no-cache build-base bash
 WORKDIR /app
-COPY go.* .
+COPY go.* ./
 RUN go mod download
 COPY . .
 
