@@ -20,12 +20,13 @@
 					<div class="card-room"><a href="/room/{{.Room}}">{{.Room}}</a></div>
 					<div class="card-title">{{.Title}}</div><!--title-->
 					<div class="card-date">{{.Create_time.Format "02 Jan 2006"}}</div>
+					<a href="/cell/{{.Id}}/edit" class="edit-link">[edit]</a>
 				</div>
 				<div class="card-body">
 					{{.HTMLBody}}
 				</div>
 				<div class="card-sources">
-					<ul class="card-source-list">Sources
+					<ul class="card-source-list">Sources <a href="/cell/{{.Id}}/sources" class="edit-link">[edit]</a>
 						{{range .Sources}}
 						<li class="card-source">{{.Source}}</li>
 						{{end}}
@@ -37,6 +38,7 @@
 				<div class="section-header">
 					<h2>Labyrinth</h2>
 					<h1>Links</h1>
+					<a href="/cell/{{.Id}}/links" class="edit-link">[edit]</a>
 				</div>
 				<div class="card-collection">
 					{{range $cell := .Links}}
@@ -53,8 +55,6 @@
 		</main>
 
 		<footer>
-			<a href="/cell/{{.Id}}/edit">Edit</a>
-			<a href="/page/new_card.html">New</a>
 		</footer>
 	</body>
 </html>
