@@ -4,7 +4,7 @@ services:
   app:
     image: lob-test
     ports:
-      - 8080:8080
+      - 80:80
     environment:
       MYSQL_ROOT_PASSWORD: my_password
       MYSQL_DATABASE: labyrinth_of_babel_test
