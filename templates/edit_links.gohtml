@@ -32,6 +32,7 @@
 	<body>
 		{{$cell := .}}
 		<header class="section-header">
+			<a href="/cell/{{.Id}}" class="back-button">&larr;Back</a>
 			<h2>{{$cell.Id}}</h2>
 			<h1>Edit Links</h1>
 		</header>
@@ -67,7 +68,6 @@
 		</main>
 		
 		<footer>
-			<a href="/cell/{{.Id}}">Back</a>
 		</footer>
 
 	</body>
