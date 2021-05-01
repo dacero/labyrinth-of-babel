@@ -71,8 +71,8 @@ var _ = Describe("Handler", func() {
 		rr = httptest.NewRecorder()
 		router = mux.NewRouter()
 		router.HandleFunc("/cell/{id}", handlers.ViewHandler(lobRepository))
-		router.HandleFunc("/cell/{id}/edit", handlers.EditHandler(lobRepository))
-		router.HandleFunc("/cell/{id}/edit/sources", handlers.SourcesHandler(lobRepository))
+		router.HandleFunc("/cell/{id}/edit", handlers.EditHandler(lobRepository, nil))
+		router.HandleFunc("/cell/{id}/edit/sources", handlers.SourcesHandler(lobRepository, nil))
 		router.HandleFunc("/cell/{id}/addSource", handlers.AddSourceHandler(lobRepository)).Methods("POST") //addSource
 		router.HandleFunc("/cell/{id}/removeSource", handlers.RemoveSourceHandler(lobRepository)).Methods("POST") //removeSource
 		router.HandleFunc("/cell/{id}/linkCell", handlers.LinkCellsHandler(lobRepository)).Methods("POST")

@@ -11,6 +11,7 @@ import (
 	"github.com/dacero/labyrinth-of-babel/repository"
 	"github.com/dacero/labyrinth-of-babel/models"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 )
 
 func ViewHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
@@ -38,8 +39,12 @@ func ViewHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *ht
 	})
 }
 
-func EditHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
+func EditHandler(lob repository.LobRepository, store *sessions.CookieStore) func(w http.ResponseWriter, r *http.Request) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if auth, _ := checkAuthorization(w, r, store); !auth {
+			http.Redirect(w, r, "/page/auth.html", http.StatusFound)
+		}
+		
 		cellId := mux.Vars(r)["id"]
 		cell, err := lob.GetCell(cellId)
 		if err != nil {
@@ -63,8 +68,12 @@ func EditHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *ht
 	})
 }
 
-func SourcesHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
+func SourcesHandler(lob repository.LobRepository, store *sessions.CookieStore) func(w http.ResponseWriter, r *http.Request) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if auth, _ := checkAuthorization(w, r, store); !auth {
+			http.Redirect(w, r, "/page/auth.html", http.StatusFound)
+		}
+		
 		cellId := mux.Vars(r)["id"]
 		cell, err := lob.GetCell(cellId)
 		if err != nil {
@@ -126,8 +135,12 @@ func RemoveSourceHandler(lob repository.LobRepository) func(w http.ResponseWrite
 	})
 }
 
-func LinksHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
+func LinksHandler(lob repository.LobRepository, store *sessions.CookieStore) func(w http.ResponseWriter, r *http.Request) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if auth, _ := checkAuthorization(w, r, store); !auth {
+			http.Redirect(w, r, "/page/auth.html", http.StatusFound)
+		}
+		
 		cellId := mux.Vars(r)["id"]
 		cell, err := lob.GetCell(cellId)
 		if err != nil {
@@ -175,8 +188,33 @@ func UnlinkCellsHandler(lob repository.LobRepository) func(w http.ResponseWriter
 	})
 }
 
+func checkAuthorization(w http.ResponseWriter, r *http.Request, store *sessions.CookieStore) (bool, error) {
+	//store == nil is for testing purposes
+	if store == nil {
+		return true, nil
+	}
+	
+	session, err := store.Get(r, "lob-session")
+	if err != nil {
+		return false, err
+	}
+	auth := session.Values["authenticated"]
+	if auth == nil {
+		return false, nil
+	}
+	if !auth.(bool) {
+		session.AddFlash("You don't have access!")
+		err = session.Save(r, w)
+		if err != nil {
+			return false, err
+		}
+		return false, nil
+	}
+	return true, nil
+}
+
 func SaveHandler(lob repository.LobRepository) func(w http.ResponseWriter, r *http.Request) {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {		
 		//parse the form and create the cell
 		updateCell := models.Cell{Id: r.PostFormValue("cellId"),
 			Title: r.PostFormValue("title"),
