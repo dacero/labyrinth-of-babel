@@ -189,8 +189,11 @@ func UnlinkCellsHandler(lob repository.LobRepository) func(w http.ResponseWriter
 }
 
 func checkAuthorization(w http.ResponseWriter, r *http.Request, store *sessions.CookieStore) (bool, error) {
-	//check if authenticated
-	log.Print("Authorizing...")
+	//store == nil is for testing purposes
+	if store == nil {
+		return true, nil
+	}
+	
 	session, err := store.Get(r, "lob-session")
 	if err != nil {
 		return false, err
