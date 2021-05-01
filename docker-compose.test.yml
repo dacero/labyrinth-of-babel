@@ -8,6 +8,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: my_password
       MYSQL_DATABASE: labyrinth_of_babel_test
+      LABYRINTH_SECRET: Follow the yellow brick road
     command:
       ["/app/utils/wait-for-it.sh", "mysql:3306", "--", "/app/utils/test.sh"] 
   mysql:
